@@ -3,4 +3,6 @@
   let slug = $page.params.slug;
 </script>
 
-{slug}
+<div class="text-center">
+  <h1 class="mt-4">{slug}</h1>
+</div>
