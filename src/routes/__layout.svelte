@@ -3,4 +3,6 @@
 </script>
 
 <Navbar/>
-<slot/>
+<div class="container">
+  <slot/>
+</div>
