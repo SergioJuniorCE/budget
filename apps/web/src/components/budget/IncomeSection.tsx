@@ -52,7 +52,7 @@ export function IncomeSection({ entries, onAdd, onEdit, onDelete, onReorder }: I
   const ids = sorted.map((e) => e._id);
 
   return (
-    <Card>
+    <Card size="sm">
       <CardHeader className="border-b">
         <CardTitle className="flex items-center justify-between">
           <span>Income</span>

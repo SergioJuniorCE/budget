@@ -167,7 +167,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
         {/* Quincena breakdown */}
         <p
           style={{
-            margin: "0 0 10px",
+            margin: "0 0 12px",
             fontSize: 10,
             fontWeight: 600,
             letterSpacing: "0.08em",
@@ -175,30 +175,104 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
             color: "#9ca3af",
           }}
         >
-          Expenses by Quincena
+          By Quincena
         </p>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 6,
-          }}
-        >
-          <span style={{ fontSize: 13, color: "#374151" }}>1ra Quincena</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>{formatCurrency(q1Expenses)}</span>
+        <div style={{ display: "flex", gap: 10 }}>
+          {(
+            [
+              {
+                label: "1ra Quincena",
+                expenses: q1Expenses,
+                remaining: totalIncome / 2 - q1Expenses,
+                accent: "#6366f1",
+                accentLight: "#eef2ff",
+              },
+              {
+                label: "2da Quincena",
+                expenses: q2Expenses,
+                remaining: totalIncome / 2 - q2Expenses,
+                accent: "#8b5cf6",
+                accentLight: "#f5f3ff",
+              },
+            ] as const
+          ).map(({ label, expenses, remaining, accent, accentLight }) => {
+            const isNegative = remaining < 0;
+            return (
+              <div
+                key={label}
+                style={{
+                  flex: 1,
+                  borderRadius: 12,
+                  overflow: "hidden",
+                  border: "1px solid #f3f4f6",
+                }}
+              >
+                {/* Colored top accent bar */}
+                <div style={{ height: 4, backgroundColor: accent }} />
+                <div style={{ padding: "12px 14px" }}>
+                  <p
+                    style={{
+                      margin: "0 0 10px",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: accent,
+                    }}
+                  >
+                    {label}
+                  </p>
+                  {/* Expenses row */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 6,
+                    }}
+                  >
+                    <span style={{ fontSize: 10, color: "#9ca3af", fontWeight: 500 }}>Gastos</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>
+                      {formatCurrency(expenses)}
+                    </span>
+                  </div>
+                  {/* Divider */}
+                  <div style={{ height: 1, backgroundColor: "#f3f4f6", marginBottom: 8 }} />
+                  {/* Remaining pill */}
+                  <div
+                    style={{
+                      backgroundColor: isNegative ? "#fef2f2" : accentLight,
+                      borderRadius: 8,
+                      padding: "6px 10px",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        color: isNegative ? "#ef4444" : accent,
+                      }}
+                    >
+                      Restante
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 800,
+                        color: isNegative ? "#ef4444" : accent,
+                      }}
+                    >
+                      {formatCurrency(remaining)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 14,
-          }}
-        >
-          <span style={{ fontSize: 13, color: "#374151" }}>2da Quincena</span>
-          <span style={{ fontSize: 13, fontWeight: 600 }}>{formatCurrency(q2Expenses)}</span>
-        </div>
+
+        {/* Total restante */}
         <div
           style={{
             display: "flex",
@@ -207,9 +281,10 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
             backgroundColor: "#f9fafb",
             borderRadius: 10,
             padding: "10px 14px",
+            marginTop: 10,
           }}
         >
-          <span style={{ fontSize: 14, fontWeight: 700 }}>Restante</span>
+          <span style={{ fontSize: 14, fontWeight: 700 }}>Total Restante</span>
           <span
             style={{
               fontSize: 16,

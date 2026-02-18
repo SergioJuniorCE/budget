@@ -7,11 +7,10 @@ import { useState } from "react";
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AddBudgetEntryDialog } from "@/components/budget/AddEntryDialog";
+import { BudgetDonutChart } from "@/components/budget/BudgetDonutChart";
 import { CategorySection } from "@/components/budget/CategorySection";
 import { IncomeSection } from "@/components/budget/IncomeSection";
 import { OverviewPanel } from "@/components/budget/OverviewPanel";
-import { ShareModal } from "@/components/budget/ShareModal";
 import type { Category, UserData, Quincena } from "@/components/budget/types";
 
 export const Route = createFileRoute("/dashboard")({
@@ -141,9 +140,9 @@ function BudgetDashboard() {
 
   return (
     <div className="space-y-4 py-4 md:py-6 px-4">
-      {/* Top row: Income + Overview */}
+      {/* Top row: Income + Overview + Donut */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
+        <div>
           <IncomeSection
             entries={data.incomeEntries}
             onAdd={handleAddIncome}
@@ -155,6 +154,9 @@ function BudgetDashboard() {
         <div>
           <OverviewPanel data={data} />
         </div>
+        <div>
+          <BudgetDonutChart data={data} />
+        </div>
       </div>
 
       {/* Bottom row: Needs / Wants / Savings */}
@@ -162,10 +164,6 @@ function BudgetDashboard() {
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Expenses
         </h2>
-        <div className="flex items-center gap-2">
-          <ShareModal data={data} />
-          <AddBudgetEntryDialog onAdd={handleAddEntry} />
-        </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <CategorySection

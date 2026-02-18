@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { HeaderShareButton } from "./HeaderShareButton";
 import { ModeToggle } from "./mode-toggle";
 
 export default function Header() {
@@ -21,6 +22,7 @@ export default function Header() {
           })}
         </nav>
         <div className="flex items-center gap-2">
+          <HeaderShareButton />
           <ModeToggle />
         </div>
       </div>
