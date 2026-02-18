@@ -26,6 +26,7 @@
     "dev:server": "turbo -F @budget/backend dev",
     "dev:setup": "turbo -F @budget/backend dev:setup",
     "deploy": "turbo -F @budget/infra deploy",
+    "deploy:backend": "turbo -F @budget/backend deploy",
     "destroy": "turbo -F @budget/infra destroy",
     "check": "oxlint && oxfmt --write"
   },
