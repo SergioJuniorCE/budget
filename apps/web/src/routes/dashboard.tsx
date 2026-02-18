@@ -58,6 +58,39 @@ function BudgetDashboard() {
   const upsertEntry = useMutation(api.budget.upsertBudgetEntry);
   const deleteEntry = useMutation(api.budget.deleteBudgetEntry);
   const reorderEntries = useMutation(api.budget.reorderBudgetEntries);
+  const togglePaid = useMutation(api.budget.toggleExpensePaid).withOptimisticUpdate(
+    (localStore, args) => {
+      const current = localStore.getQuery(api.budget.getData, {});
+      if (current === undefined) return;
+      localStore.setQuery(
+        api.budget.getData,
+        {},
+        {
+          ...current,
+          budgetEntries: current.budgetEntries.map((e) =>
+            e._id === args.id ? { ...e, paid: args.paid } : e,
+          ),
+        },
+      );
+    },
+  );
+
+  const resetQuincena = useMutation(api.budget.resetQuincenaPayments).withOptimisticUpdate(
+    (localStore, args) => {
+      const current = localStore.getQuery(api.budget.getData, {});
+      if (current === undefined) return;
+      localStore.setQuery(
+        api.budget.getData,
+        {},
+        {
+          ...current,
+          budgetEntries: current.budgetEntries.map((e) =>
+            e.quincena === args.quincena ? { ...e, paid: false } : e,
+          ),
+        },
+      );
+    },
+  );
 
   // ── Income handlers ────────────────────────────────────────────────────────
 
@@ -108,6 +141,14 @@ function BudgetDashboard() {
 
   function handleReorderEntries(ids: Id<"budgetEntries">[]) {
     reorderEntries({ ids });
+  }
+
+  function handleTogglePaid(id: Id<"budgetEntries">, paid: boolean) {
+    togglePaid({ id, paid });
+  }
+
+  function handleResetQuincena(quincena: Quincena) {
+    resetQuincena({ quincena });
   }
 
   if (rawData === undefined) {
@@ -175,6 +216,8 @@ function BudgetDashboard() {
           onEdit={handleEditEntry}
           onDelete={handleDeleteEntry}
           onReorder={handleReorderEntries}
+          onTogglePaid={handleTogglePaid}
+          onResetQuincena={handleResetQuincena}
         />
         <CategorySection
           category="wants"
@@ -185,6 +228,8 @@ function BudgetDashboard() {
           onEdit={handleEditEntry}
           onDelete={handleDeleteEntry}
           onReorder={handleReorderEntries}
+          onTogglePaid={handleTogglePaid}
+          onResetQuincena={handleResetQuincena}
         />
         <CategorySection
           category="savings"
@@ -195,6 +240,8 @@ function BudgetDashboard() {
           onEdit={handleEditEntry}
           onDelete={handleDeleteEntry}
           onReorder={handleReorderEntries}
+          onTogglePaid={handleTogglePaid}
+          onResetQuincena={handleResetQuincena}
         />
       </div>
     </div>

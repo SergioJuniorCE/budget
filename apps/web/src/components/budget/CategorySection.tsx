@@ -57,6 +57,8 @@ interface CategorySectionProps {
   onEdit: (id: Id<"budgetEntries">, name: string, amount: number, note?: string) => void;
   onDelete: (id: Id<"budgetEntries">) => void;
   onReorder: (ids: Id<"budgetEntries">[]) => void;
+  onTogglePaid: (id: Id<"budgetEntries">, paid: boolean) => void;
+  onResetQuincena: (quincena: Quincena) => void;
 }
 
 export function CategorySection({
@@ -68,6 +70,8 @@ export function CategorySection({
   onEdit,
   onDelete,
   onReorder,
+  onTogglePaid,
+  onResetQuincena,
 }: CategorySectionProps) {
   const q1 = sortedEntries(entries.filter((e) => e.quincena === "1ra"));
   const q2 = sortedEntries(entries.filter((e) => e.quincena === "2da"));
@@ -118,6 +122,8 @@ export function CategorySection({
             onEdit={onEdit}
             onDelete={onDelete}
             onReorder={onReorder}
+            onTogglePaid={onTogglePaid}
+            onResetQuincena={onResetQuincena}
           />
           <QuincenaExpenseColumn
             label="2da Quincena"
@@ -130,6 +136,8 @@ export function CategorySection({
             onEdit={onEdit}
             onDelete={onDelete}
             onReorder={onReorder}
+            onTogglePaid={onTogglePaid}
+            onResetQuincena={onResetQuincena}
           />
         </div>
         <div className="mt-3 border-t pt-2 flex justify-between items-center">
@@ -162,6 +170,8 @@ interface QuincenaExpenseColumnProps {
   onEdit: (id: Id<"budgetEntries">, name: string, amount: number, note?: string) => void;
   onDelete: (id: Id<"budgetEntries">) => void;
   onReorder: (ids: Id<"budgetEntries">[]) => void;
+  onTogglePaid: (id: Id<"budgetEntries">, paid: boolean) => void;
+  onResetQuincena: (quincena: Quincena) => void;
 }
 
 function QuincenaExpenseColumn({
@@ -175,8 +185,13 @@ function QuincenaExpenseColumn({
   onEdit,
   onDelete,
   onReorder,
+  onTogglePaid,
+  onResetQuincena,
 }: QuincenaExpenseColumnProps) {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const paidCount = entries.filter((e) => e.paid).length;
+  const hasPaid = paidCount > 0;
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -194,23 +209,41 @@ function QuincenaExpenseColumn({
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      <div className="flex items-center justify-between mb-1">
-        <p className="text-xs text-muted-foreground font-medium">{label}</p>
-        <button
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => {
-            const name = window.prompt("Name:");
-            if (!name) return;
-            const amtStr = window.prompt("Amount:");
-            if (!amtStr) return;
-            const amount = parseFloat(amtStr);
-            if (isNaN(amount)) return;
-            onAdd(name.trim(), amount, category, quincena);
-          }}
-          aria-label={`Quick add to ${label}`}
-        >
-          + Quick add
-        </button>
+      <div className="flex items-center justify-between mb-1 gap-1">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <p className="text-xs text-muted-foreground font-medium shrink-0">{label}</p>
+          {entries.length > 0 && (
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {paidCount}/{entries.length}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {hasPaid && (
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => onResetQuincena(quincena)}
+              aria-label={`Reset payments for ${label}`}
+            >
+              Reset
+            </button>
+          )}
+          <button
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => {
+              const name = window.prompt("Name:");
+              if (!name) return;
+              const amtStr = window.prompt("Amount:");
+              if (!amtStr) return;
+              const amount = parseFloat(amtStr);
+              if (isNaN(amount)) return;
+              onAdd(name.trim(), amount, category, quincena);
+            }}
+            aria-label={`Quick add to ${label}`}
+          >
+            + Quick add
+          </button>
+        </div>
       </div>
       <div className="flex-1 flex flex-col border-t border-border/50">
         {entries.length === 0 && <p className="text-xs text-muted-foreground italic">No entries</p>}
@@ -223,8 +256,10 @@ function QuincenaExpenseColumn({
                 name={entry.name}
                 amount={entry.amount}
                 note={entry.note}
+                paid={entry.paid}
                 onEdit={(name, amount, note) => onEdit(entry._id, name, amount, note)}
                 onDelete={() => onDelete(entry._id)}
+                onTogglePaid={(paid) => onTogglePaid(entry._id, paid)}
               />
             ))}
           </SortableContext>

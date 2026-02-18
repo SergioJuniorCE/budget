@@ -20,6 +20,7 @@ export default defineSchema({
     quincena: v.union(v.literal("1ra"), v.literal("2da")),
     note: v.optional(v.string()),
     order: v.optional(v.number()),
+    paid: v.optional(v.boolean()),
     // Temporary: kept optional while migrating away from month-based architecture
     budgetMonthId: v.optional(v.string()),
   }).index("by_user", ["userId"]),

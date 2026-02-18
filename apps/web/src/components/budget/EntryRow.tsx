@@ -3,6 +3,7 @@ import { useState } from "react";
 import { PencilIcon, Trash2Icon, CheckIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
   ContextMenu,
@@ -18,8 +19,10 @@ interface EntryRowProps {
   name: string;
   amount: number;
   note?: string;
+  paid?: boolean;
   onEdit: (name: string, amount: number, note?: string) => void;
   onDelete: () => void;
+  onTogglePaid?: (paid: boolean) => void;
   className?: string;
   dragHandle?: React.ReactNode;
 }
@@ -28,8 +31,10 @@ export function EntryRow({
   name,
   amount,
   note,
+  paid,
   onEdit,
   onDelete,
+  onTogglePaid,
   className,
   dragHandle,
 }: EntryRowProps) {
@@ -83,10 +88,29 @@ export function EntryRow({
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <div
-          className={cn("group flex items-center gap-1 py-1 border-b border-border/50", className)}
+          className={cn(
+            "group flex items-center gap-1 py-1 border-b border-border/50 transition-opacity",
+            paid && "opacity-50",
+            className,
+          )}
         >
           {dragHandle}
-          <span className="flex-1 min-w-0 truncate text-xs">{name}</span>
+          {onTogglePaid && (
+            <Checkbox
+              checked={!!paid}
+              onCheckedChange={(checked) => onTogglePaid(!!checked)}
+              className="shrink-0 h-3 w-3"
+              aria-label={paid ? "Mark as unpaid" : "Mark as paid"}
+            />
+          )}
+          <span
+            className={cn(
+              "flex-1 min-w-0 truncate text-xs",
+              paid && "line-through text-muted-foreground",
+            )}
+          >
+            {name}
+          </span>
           <span className="tabular-nums text-xs text-muted-foreground shrink-0">
             {formatCurrency(amount)}
           </span>

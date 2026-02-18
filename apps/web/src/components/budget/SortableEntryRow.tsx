@@ -9,8 +9,10 @@ interface SortableEntryRowProps {
   name: string;
   amount: number;
   note?: string;
+  paid?: boolean;
   onEdit: (name: string, amount: number, note?: string) => void;
   onDelete: () => void;
+  onTogglePaid?: (paid: boolean) => void;
 }
 
 export function SortableEntryRow({
@@ -18,8 +20,10 @@ export function SortableEntryRow({
   name,
   amount,
   note,
+  paid,
   onEdit,
   onDelete,
+  onTogglePaid,
 }: SortableEntryRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
@@ -49,8 +53,10 @@ export function SortableEntryRow({
         name={name}
         amount={amount}
         note={note}
+        paid={paid}
         onEdit={onEdit}
         onDelete={onDelete}
+        onTogglePaid={onTogglePaid}
         dragHandle={dragHandle}
       />
     </div>

@@ -31,6 +31,7 @@ const budgetEntryValidator = v.object({
   quincena: quincenaValidator,
   note: v.optional(v.string()),
   order: v.optional(v.number()),
+  paid: v.optional(v.boolean()),
   budgetMonthId: v.optional(v.string()),
 });
 
@@ -172,6 +173,43 @@ export const deleteBudgetEntry = mutation({
       throw new ConvexError("Budget entry not found");
     }
     await ctx.db.delete("budgetEntries", args.id);
+    return null;
+  },
+});
+
+// ─── Payment Tracking Mutations ──────────────────────────────────────────────
+
+export const toggleExpensePaid = mutation({
+  args: {
+    id: v.id("budgetEntries"),
+    paid: v.boolean(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const entry = await ctx.db.get("budgetEntries", args.id);
+    if (!entry || entry.userId !== user.userId) {
+      throw new ConvexError("Budget entry not found");
+    }
+    await ctx.db.patch("budgetEntries", args.id, { paid: args.paid });
+    return null;
+  },
+});
+
+export const resetQuincenaPayments = mutation({
+  args: { quincena: quincenaValidator },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    const entries = await ctx.db
+      .query("budgetEntries")
+      .withIndex("by_user", (q) => q.eq("userId", user.userId))
+      .collect();
+    for (const entry of entries) {
+      if (entry.quincena === args.quincena && entry.paid) {
+        await ctx.db.patch("budgetEntries", entry._id, { paid: false });
+      }
+    }
     return null;
   },
 });

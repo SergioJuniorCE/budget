@@ -23,6 +23,7 @@ export interface BudgetEntry {
   quincena: Quincena;
   note?: string;
   order?: number;
+  paid?: boolean;
 }
 
 export interface UserData {
