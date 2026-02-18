@@ -45,7 +45,7 @@ export function EntryRow({
 
   if (editing) {
     return (
-      <div className={cn("flex items-center gap-1 py-0.5", className)}>
+      <div className={cn("flex items-center gap-1 py-1 border-b border-border/50", className)}>
         <Input
           className="h-6 flex-1 min-w-0 text-xs px-1"
           value={editName}
@@ -73,7 +73,7 @@ export function EntryRow({
   }
 
   return (
-    <div className={cn("group flex items-center gap-1 py-0.5", className)}>
+    <div className={cn("group flex items-center gap-1 py-1 border-b border-border/50", className)}>
       {dragHandle}
       <span className="flex-1 min-w-0 truncate text-xs">{name}</span>
       <span className="tabular-nums text-xs text-muted-foreground shrink-0">

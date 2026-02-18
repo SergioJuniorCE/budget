@@ -106,13 +106,14 @@ export function CategorySection({
         </div>
       </CardHeader>
       <CardContent className="pt-3 flex-1 flex flex-col">
-        <div className="grid grid-cols-2 gap-4 items-stretch flex-1">
+        <div className="grid grid-cols-2 divide-x items-stretch flex-1">
           <QuincenaExpenseColumn
             label="1ra Quincena"
             entries={q1}
             total={q1Total}
             category={category}
             quincena="1ra"
+            className="pr-3"
             onAdd={onAdd}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -124,6 +125,7 @@ export function CategorySection({
             total={q2Total}
             category={category}
             quincena="2da"
+            className="pl-3"
             onAdd={onAdd}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -149,6 +151,7 @@ interface QuincenaExpenseColumnProps {
   total: number;
   category: Category;
   quincena: Quincena;
+  className?: string;
   onAdd: (
     name: string,
     amount: number,
@@ -167,6 +170,7 @@ function QuincenaExpenseColumn({
   total,
   category,
   quincena,
+  className,
   onAdd,
   onEdit,
   onDelete,
@@ -189,7 +193,7 @@ function QuincenaExpenseColumn({
   const ids = entries.map((e) => e._id);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className={cn("flex flex-col h-full", className)}>
       <div className="flex items-center justify-between mb-1">
         <p className="text-xs text-muted-foreground font-medium">{label}</p>
         <button
@@ -208,7 +212,7 @@ function QuincenaExpenseColumn({
           + Quick add
         </button>
       </div>
-      <div className="flex-1 flex flex-col gap-1">
+      <div className="flex-1 flex flex-col border-t border-border/50">
         {entries.length === 0 && <p className="text-xs text-muted-foreground italic">No entries</p>}
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={ids} strategy={verticalListSortingStrategy}>
