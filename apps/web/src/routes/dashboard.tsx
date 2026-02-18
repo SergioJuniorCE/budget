@@ -55,8 +55,10 @@ function BudgetDashboard() {
 
   const upsertIncome = useMutation(api.budget.upsertIncomeEntry);
   const deleteIncome = useMutation(api.budget.deleteIncomeEntry);
+  const reorderIncome = useMutation(api.budget.reorderIncomeEntries);
   const upsertEntry = useMutation(api.budget.upsertBudgetEntry);
   const deleteEntry = useMutation(api.budget.deleteBudgetEntry);
+  const reorderEntries = useMutation(api.budget.reorderBudgetEntries);
 
   // ── Income handlers ────────────────────────────────────────────────────────
 
@@ -70,6 +72,10 @@ function BudgetDashboard() {
 
   function handleDeleteIncome(id: Id<"incomeEntries">) {
     deleteIncome({ id });
+  }
+
+  function handleReorderIncome(ids: Id<"incomeEntries">[]) {
+    reorderIncome({ ids });
   }
 
   // ── Budget entry handlers ──────────────────────────────────────────────────
@@ -99,6 +105,10 @@ function BudgetDashboard() {
 
   function handleDeleteEntry(id: Id<"budgetEntries">) {
     deleteEntry({ id });
+  }
+
+  function handleReorderEntries(ids: Id<"budgetEntries">[]) {
+    reorderEntries({ ids });
   }
 
   if (rawData === undefined) {
@@ -139,6 +149,7 @@ function BudgetDashboard() {
             onAdd={handleAddIncome}
             onEdit={handleEditIncome}
             onDelete={handleDeleteIncome}
+            onReorder={handleReorderIncome}
           />
         </div>
         <div>
@@ -165,6 +176,7 @@ function BudgetDashboard() {
           onAdd={handleAddEntry}
           onEdit={handleEditEntry}
           onDelete={handleDeleteEntry}
+          onReorder={handleReorderEntries}
         />
         <CategorySection
           category="wants"
@@ -174,6 +186,7 @@ function BudgetDashboard() {
           onAdd={handleAddEntry}
           onEdit={handleEditEntry}
           onDelete={handleDeleteEntry}
+          onReorder={handleReorderEntries}
         />
         <CategorySection
           category="savings"
@@ -183,6 +196,7 @@ function BudgetDashboard() {
           onAdd={handleAddEntry}
           onEdit={handleEditEntry}
           onDelete={handleDeleteEntry}
+          onReorder={handleReorderEntries}
         />
       </div>
     </div>

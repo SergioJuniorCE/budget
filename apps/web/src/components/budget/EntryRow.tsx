@@ -1,3 +1,4 @@
+import type React from "react";
 import { useState } from "react";
 import { PencilIcon, Trash2Icon, CheckIcon, XIcon } from "lucide-react";
 
@@ -13,9 +14,18 @@ interface EntryRowProps {
   onEdit: (name: string, amount: number, note?: string) => void;
   onDelete: () => void;
   className?: string;
+  dragHandle?: React.ReactNode;
 }
 
-export function EntryRow({ name, amount, note, onEdit, onDelete, className }: EntryRowProps) {
+export function EntryRow({
+  name,
+  amount,
+  note,
+  onEdit,
+  onDelete,
+  className,
+  dragHandle,
+}: EntryRowProps) {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(name);
   const [editAmount, setEditAmount] = useState(String(amount));
@@ -64,6 +74,7 @@ export function EntryRow({ name, amount, note, onEdit, onDelete, className }: En
 
   return (
     <div className={cn("group flex items-center gap-1 py-0.5", className)}>
+      {dragHandle}
       <span className="flex-1 min-w-0 truncate text-xs">{name}</span>
       <span className="tabular-nums text-xs text-muted-foreground shrink-0">
         {formatCurrency(amount)}

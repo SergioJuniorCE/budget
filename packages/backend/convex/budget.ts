@@ -17,6 +17,7 @@ const incomeEntryValidator = v.object({
   name: v.string(),
   amount: v.number(),
   note: v.optional(v.string()),
+  order: v.optional(v.number()),
   budgetMonthId: v.optional(v.string()),
 });
 
@@ -29,6 +30,7 @@ const budgetEntryValidator = v.object({
   category: categoryValidator,
   quincena: quincenaValidator,
   note: v.optional(v.string()),
+  order: v.optional(v.number()),
   budgetMonthId: v.optional(v.string()),
 });
 
@@ -170,6 +172,38 @@ export const deleteBudgetEntry = mutation({
       throw new ConvexError("Budget entry not found");
     }
     await ctx.db.delete("budgetEntries", args.id);
+    return null;
+  },
+});
+
+// ─── Reorder Mutations ───────────────────────────────────────────────────────
+
+export const reorderBudgetEntries = mutation({
+  args: { ids: v.array(v.id("budgetEntries")) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    for (let i = 0; i < args.ids.length; i++) {
+      const entry = await ctx.db.get("budgetEntries", args.ids[i]);
+      if (entry && entry.userId === user.userId) {
+        await ctx.db.patch("budgetEntries", args.ids[i], { order: i });
+      }
+    }
+    return null;
+  },
+});
+
+export const reorderIncomeEntries = mutation({
+  args: { ids: v.array(v.id("incomeEntries")) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+    for (let i = 0; i < args.ids.length; i++) {
+      const entry = await ctx.db.get("incomeEntries", args.ids[i]);
+      if (entry && entry.userId === user.userId) {
+        await ctx.db.patch("incomeEntries", args.ids[i], { order: i });
+      }
+    }
     return null;
   },
 });

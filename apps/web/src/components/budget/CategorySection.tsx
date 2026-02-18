@@ -1,9 +1,18 @@
 import type { Id } from "@budget/backend/convex/_generated/dataModel";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { AddBudgetEntryDialog } from "./AddEntryDialog";
-import { EntryRow } from "./EntryRow";
+import { SortableEntryRow } from "./SortableEntryRow";
 import {
   CATEGORY_LABELS,
   formatCurrency,
@@ -24,6 +33,15 @@ const CATEGORY_BG: Record<Category, string> = {
   savings: "bg-emerald-500",
 };
 
+function sortedEntries(entries: BudgetEntry[]): BudgetEntry[] {
+  return [...entries].sort((a, b) => {
+    if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
+    if (a.order !== undefined) return -1;
+    if (b.order !== undefined) return 1;
+    return a._creationTime - b._creationTime;
+  });
+}
+
 interface CategorySectionProps {
   category: Category;
   entries: BudgetEntry[];
@@ -38,6 +56,7 @@ interface CategorySectionProps {
   ) => void;
   onEdit: (id: Id<"budgetEntries">, name: string, amount: number, note?: string) => void;
   onDelete: (id: Id<"budgetEntries">) => void;
+  onReorder: (ids: Id<"budgetEntries">[]) => void;
 }
 
 export function CategorySection({
@@ -48,9 +67,10 @@ export function CategorySection({
   onAdd,
   onEdit,
   onDelete,
+  onReorder,
 }: CategorySectionProps) {
-  const q1 = entries.filter((e) => e.quincena === "1ra");
-  const q2 = entries.filter((e) => e.quincena === "2da");
+  const q1 = sortedEntries(entries.filter((e) => e.quincena === "1ra"));
+  const q2 = sortedEntries(entries.filter((e) => e.quincena === "2da"));
   const q1Total = q1.reduce((s, e) => s + e.amount, 0);
   const q2Total = q2.reduce((s, e) => s + e.amount, 0);
 
@@ -96,6 +116,7 @@ export function CategorySection({
             onAdd={onAdd}
             onEdit={onEdit}
             onDelete={onDelete}
+            onReorder={onReorder}
           />
           <QuincenaExpenseColumn
             label="2da Quincena"
@@ -106,6 +127,7 @@ export function CategorySection({
             onAdd={onAdd}
             onEdit={onEdit}
             onDelete={onDelete}
+            onReorder={onReorder}
           />
         </div>
         <div className="mt-3 border-t pt-2 flex justify-between items-center">
@@ -136,6 +158,7 @@ interface QuincenaExpenseColumnProps {
   ) => void;
   onEdit: (id: Id<"budgetEntries">, name: string, amount: number, note?: string) => void;
   onDelete: (id: Id<"budgetEntries">) => void;
+  onReorder: (ids: Id<"budgetEntries">[]) => void;
 }
 
 function QuincenaExpenseColumn({
@@ -147,7 +170,24 @@ function QuincenaExpenseColumn({
   onAdd,
   onEdit,
   onDelete,
+  onReorder,
 }: QuincenaExpenseColumnProps) {
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = entries.findIndex((e) => e._id === active.id);
+    const newIndex = entries.findIndex((e) => e._id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(entries, oldIndex, newIndex);
+    onReorder(reordered.map((e) => e._id));
+  }
+
+  const ids = entries.map((e) => e._id);
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between mb-1">
@@ -169,16 +209,21 @@ function QuincenaExpenseColumn({
         </button>
       </div>
       {entries.length === 0 && <p className="text-xs text-muted-foreground italic">No entries</p>}
-      {entries.map((entry) => (
-        <EntryRow
-          key={entry._id}
-          name={entry.name}
-          amount={entry.amount}
-          note={entry.note}
-          onEdit={(name, amount, note) => onEdit(entry._id, name, amount, note)}
-          onDelete={() => onDelete(entry._id)}
-        />
-      ))}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+          {entries.map((entry) => (
+            <SortableEntryRow
+              key={entry._id}
+              id={entry._id}
+              name={entry.name}
+              amount={entry.amount}
+              note={entry.note}
+              onEdit={(name, amount, note) => onEdit(entry._id, name, amount, note)}
+              onDelete={() => onDelete(entry._id)}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
       <div className="border-t mt-1 pt-1 flex justify-between">
         <span className="text-xs text-muted-foreground">Subtotal</span>
         <span className="text-xs tabular-nums font-medium">{formatCurrency(total)}</span>

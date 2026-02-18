@@ -10,6 +10,7 @@ export interface IncomeEntry {
   name: string;
   amount: number;
   note?: string;
+  order?: number;
 }
 
 export interface BudgetEntry {
@@ -21,6 +22,7 @@ export interface BudgetEntry {
   category: Category;
   quincena: Quincena;
   note?: string;
+  order?: number;
 }
 
 export interface UserData {
