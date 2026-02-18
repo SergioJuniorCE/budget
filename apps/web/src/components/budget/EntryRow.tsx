@@ -4,6 +4,13 @@ import { PencilIcon, Trash2Icon, CheckIcon, XIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "./types";
 
@@ -73,20 +80,27 @@ export function EntryRow({
   }
 
   return (
-    <div className={cn("group flex items-center gap-1 py-1 border-b border-border/50", className)}>
-      {dragHandle}
-      <span className="flex-1 min-w-0 truncate text-xs">{name}</span>
-      <span className="tabular-nums text-xs text-muted-foreground shrink-0">
-        {formatCurrency(amount)}
-      </span>
-      <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-        <Button size="icon-xs" variant="ghost" onClick={() => setEditing(true)} aria-label="Edit">
-          <PencilIcon />
-        </Button>
-        <Button size="icon-xs" variant="destructive" onClick={onDelete} aria-label="Delete">
-          <Trash2Icon />
-        </Button>
-      </div>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          className={cn("group flex items-center gap-1 py-1 border-b border-border/50", className)}
+        >
+          {dragHandle}
+          <span className="flex-1 min-w-0 truncate text-xs">{name}</span>
+          <span className="tabular-nums text-xs text-muted-foreground shrink-0">
+            {formatCurrency(amount)}
+          </span>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem onClick={() => setEditing(true)}>
+          <PencilIcon className="mr-2 h-3.5 w-3.5" /> Edit
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+          <Trash2Icon className="mr-2 h-3.5 w-3.5" /> Delete
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
