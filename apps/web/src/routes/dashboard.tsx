@@ -113,7 +113,7 @@ function BudgetDashboard() {
 
   if (rawData === undefined) {
     return (
-      <div className="space-y-4 p-4 md:p-6 max-w-screen-2xl mx-auto">
+      <div className="space-y-4 py-4 md:py-6 px-4">
         <Skeleton className="h-40 w-full" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <Skeleton className="h-64" />
@@ -140,7 +140,7 @@ function BudgetDashboard() {
   const savingsCurrent = savingsEntries.reduce((s, e) => s + e.amount, 0);
 
   return (
-    <div className="space-y-4 p-4 md:p-6 max-w-screen-2xl mx-auto">
+    <div className="space-y-4 py-4 md:py-6 px-4">
       {/* Top row: Income + Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
