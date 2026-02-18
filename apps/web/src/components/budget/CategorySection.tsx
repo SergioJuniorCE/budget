@@ -105,8 +105,8 @@ export function CategorySection({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-3 flex-1">
-        <div className="grid grid-cols-2 gap-4">
+      <CardContent className="pt-3 flex-1 flex flex-col">
+        <div className="grid grid-cols-2 gap-4 items-stretch flex-1">
           <QuincenaExpenseColumn
             label="1ra Quincena"
             entries={q1}
@@ -189,7 +189,7 @@ function QuincenaExpenseColumn({
   const ids = entries.map((e) => e._id);
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-1">
         <p className="text-xs text-muted-foreground font-medium">{label}</p>
         <button
@@ -208,22 +208,24 @@ function QuincenaExpenseColumn({
           + Quick add
         </button>
       </div>
-      {entries.length === 0 && <p className="text-xs text-muted-foreground italic">No entries</p>}
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-          {entries.map((entry) => (
-            <SortableEntryRow
-              key={entry._id}
-              id={entry._id}
-              name={entry.name}
-              amount={entry.amount}
-              note={entry.note}
-              onEdit={(name, amount, note) => onEdit(entry._id, name, amount, note)}
-              onDelete={() => onDelete(entry._id)}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+      <div className="flex-1 flex flex-col gap-1">
+        {entries.length === 0 && <p className="text-xs text-muted-foreground italic">No entries</p>}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+            {entries.map((entry) => (
+              <SortableEntryRow
+                key={entry._id}
+                id={entry._id}
+                name={entry.name}
+                amount={entry.amount}
+                note={entry.note}
+                onEdit={(name, amount, note) => onEdit(entry._id, name, amount, note)}
+                onDelete={() => onDelete(entry._id)}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
       <div className="border-t mt-1 pt-1 flex justify-between">
         <span className="text-xs text-muted-foreground">Subtotal</span>
         <span className="text-xs tabular-nums font-medium">{formatCurrency(total)}</span>
