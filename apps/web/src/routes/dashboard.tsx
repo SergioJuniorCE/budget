@@ -11,6 +11,7 @@ import { AddBudgetEntryDialog } from "@/components/budget/AddEntryDialog";
 import { CategorySection } from "@/components/budget/CategorySection";
 import { IncomeSection } from "@/components/budget/IncomeSection";
 import { OverviewPanel } from "@/components/budget/OverviewPanel";
+import { ShareModal } from "@/components/budget/ShareModal";
 import type { Category, UserData, Quincena } from "@/components/budget/types";
 
 export const Route = createFileRoute("/dashboard")({
@@ -150,7 +151,10 @@ function BudgetDashboard() {
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Expenses
         </h2>
-        <AddBudgetEntryDialog onAdd={handleAddEntry} />
+        <div className="flex items-center gap-2">
+          <ShareModal data={data} />
+          <AddBudgetEntryDialog onAdd={handleAddEntry} />
+        </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <CategorySection
