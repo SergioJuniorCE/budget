@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { GenericMutationCtx } from "convex/server";
 
 import { authComponent } from "./auth";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import type { DataModel } from "./_generated/dataModel";
 
 // ─── Validators ────────────────────────────────────────────────────────────
@@ -13,31 +13,23 @@ const categoryValidator = v.union(v.literal("needs"), v.literal("wants"), v.lite
 const incomeEntryValidator = v.object({
   _id: v.id("incomeEntries"),
   _creationTime: v.number(),
-  budgetMonthId: v.id("budgetMonths"),
   userId: v.string(),
   name: v.string(),
   amount: v.number(),
   note: v.optional(v.string()),
+  budgetMonthId: v.optional(v.string()),
 });
 
 const budgetEntryValidator = v.object({
   _id: v.id("budgetEntries"),
   _creationTime: v.number(),
-  budgetMonthId: v.id("budgetMonths"),
   userId: v.string(),
   name: v.string(),
   amount: v.number(),
   category: categoryValidator,
   quincena: quincenaValidator,
   note: v.optional(v.string()),
-});
-
-const budgetMonthValidator = v.object({
-  _id: v.id("budgetMonths"),
-  _creationTime: v.number(),
-  userId: v.string(),
-  year: v.number(),
-  month: v.number(),
+  budgetMonthId: v.optional(v.string()),
 });
 
 // ─── Helper ─────────────────────────────────────────────────────────────────
@@ -52,79 +44,29 @@ async function requireUser(ctx: GenericMutationCtx<DataModel>) {
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
-export const getOrCreateMonth = mutation({
-  args: {
-    year: v.number(),
-    month: v.number(),
-  },
-  returns: budgetMonthValidator,
-  handler: async (ctx, args) => {
-    const user = await requireUser(ctx);
-    const userId = user.userId;
-
-    const existing = await ctx.db
-      .query("budgetMonths")
-      .withIndex("by_user_year_month", (q) =>
-        q.eq("userId", userId).eq("year", args.year).eq("month", args.month),
-      )
-      .unique();
-
-    if (existing) return existing;
-
-    const id = await ctx.db.insert("budgetMonths", {
-      userId,
-      year: args.year,
-      month: args.month,
-    });
-    return (await ctx.db.get("budgetMonths", id))!;
-  },
-});
-
-export const getMonthData = query({
-  args: {
-    budgetMonthId: v.id("budgetMonths"),
-  },
-  returns: v.union(
-    v.object({
-      month: budgetMonthValidator,
-      incomeEntries: v.array(incomeEntryValidator),
-      budgetEntries: v.array(budgetEntryValidator),
-    }),
-    v.null(),
-  ),
-  handler: async (ctx, args) => {
+export const getData = query({
+  args: {},
+  returns: v.object({
+    incomeEntries: v.array(incomeEntryValidator),
+    budgetEntries: v.array(budgetEntryValidator),
+  }),
+  handler: async (ctx) => {
     const user = await authComponent.safeGetAuthUser(ctx);
-    if (!user) return null;
+    if (!user) return { incomeEntries: [], budgetEntries: [] };
 
-    const month = await ctx.db.get("budgetMonths", args.budgetMonthId);
-    if (!month || month.userId !== String(user._id)) return null;
+    const userId = String(user._id);
 
     const incomeEntries = await ctx.db
       .query("incomeEntries")
-      .withIndex("by_budget_month", (q) => q.eq("budgetMonthId", args.budgetMonthId))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
     const budgetEntries = await ctx.db
       .query("budgetEntries")
-      .withIndex("by_budget_month", (q) => q.eq("budgetMonthId", args.budgetMonthId))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .collect();
 
-    return { month, incomeEntries, budgetEntries };
-  },
-});
-
-export const listMonths = query({
-  args: {},
-  returns: v.array(budgetMonthValidator),
-  handler: async (ctx) => {
-    const user = await authComponent.safeGetAuthUser(ctx);
-    if (!user) return [];
-
-    return await ctx.db
-      .query("budgetMonths")
-      .withIndex("by_user_year_month", (q) => q.eq("userId", String(user._id)))
-      .order("desc")
-      .collect();
+    return { incomeEntries, budgetEntries };
   },
 });
 
@@ -133,7 +75,6 @@ export const listMonths = query({
 export const upsertIncomeEntry = mutation({
   args: {
     id: v.optional(v.id("incomeEntries")),
-    budgetMonthId: v.id("budgetMonths"),
     name: v.string(),
     amount: v.number(),
     note: v.optional(v.string()),
@@ -141,11 +82,6 @@ export const upsertIncomeEntry = mutation({
   returns: v.id("incomeEntries"),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-
-    const month = await ctx.db.get("budgetMonths", args.budgetMonthId);
-    if (!month || month.userId !== user.userId) {
-      throw new ConvexError("Budget month not found");
-    }
 
     if (args.id) {
       const entry = await ctx.db.get("incomeEntries", args.id);
@@ -161,7 +97,6 @@ export const upsertIncomeEntry = mutation({
     }
 
     return await ctx.db.insert("incomeEntries", {
-      budgetMonthId: args.budgetMonthId,
       userId: user.userId,
       name: args.name,
       amount: args.amount,
@@ -189,7 +124,6 @@ export const deleteIncomeEntry = mutation({
 export const upsertBudgetEntry = mutation({
   args: {
     id: v.optional(v.id("budgetEntries")),
-    budgetMonthId: v.id("budgetMonths"),
     name: v.string(),
     amount: v.number(),
     category: categoryValidator,
@@ -199,11 +133,6 @@ export const upsertBudgetEntry = mutation({
   returns: v.id("budgetEntries"),
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
-
-    const month = await ctx.db.get("budgetMonths", args.budgetMonthId);
-    if (!month || month.userId !== user.userId) {
-      throw new ConvexError("Budget month not found");
-    }
 
     if (args.id) {
       const entry = await ctx.db.get("budgetEntries", args.id);
@@ -221,7 +150,6 @@ export const upsertBudgetEntry = mutation({
     }
 
     return await ctx.db.insert("budgetEntries", {
-      budgetMonthId: args.budgetMonthId,
       userId: user.userId,
       name: args.name,
       amount: args.amount,
@@ -243,5 +171,50 @@ export const deleteBudgetEntry = mutation({
     }
     await ctx.db.delete("budgetEntries", args.id);
     return null;
+  },
+});
+
+// ─── One-time Migration ──────────────────────────────────────────────────────
+// Run once via the Convex dashboard to strip the legacy `budgetMonthId` field
+// from all existing documents. After running, remove the optional field from
+// the schema and delete this function.
+
+export const removeBudgetMonthIds = internalMutation({
+  args: {},
+  returns: v.object({ budgetEntries: v.number(), incomeEntries: v.number() }),
+  handler: async (ctx) => {
+    const budgetEntries = await ctx.db.query("budgetEntries").collect();
+    let budgetCount = 0;
+    for (const entry of budgetEntries) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ("budgetMonthId" in (entry as any)) {
+        const {
+          _id,
+          _creationTime,
+          budgetMonthId: _removed,
+          ...rest
+        } = entry as typeof entry & { budgetMonthId?: string };
+        await ctx.db.replace(_id, rest);
+        budgetCount++;
+      }
+    }
+
+    const incomeEntries = await ctx.db.query("incomeEntries").collect();
+    let incomeCount = 0;
+    for (const entry of incomeEntries) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ("budgetMonthId" in (entry as any)) {
+        const {
+          _id,
+          _creationTime,
+          budgetMonthId: _removed,
+          ...rest
+        } = entry as typeof entry & { budgetMonthId?: string };
+        await ctx.db.replace(_id, rest);
+        incomeCount++;
+      }
+    }
+
+    return { budgetEntries: budgetCount, incomeEntries: incomeCount };
   },
 });

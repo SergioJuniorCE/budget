@@ -6,7 +6,6 @@ export type Category = "needs" | "wants" | "savings";
 export interface IncomeEntry {
   _id: Id<"incomeEntries">;
   _creationTime: number;
-  budgetMonthId: Id<"budgetMonths">;
   userId: string;
   name: string;
   amount: number;
@@ -16,7 +15,6 @@ export interface IncomeEntry {
 export interface BudgetEntry {
   _id: Id<"budgetEntries">;
   _creationTime: number;
-  budgetMonthId: Id<"budgetMonths">;
   userId: string;
   name: string;
   amount: number;
@@ -25,16 +23,7 @@ export interface BudgetEntry {
   note?: string;
 }
 
-export interface BudgetMonth {
-  _id: Id<"budgetMonths">;
-  _creationTime: number;
-  userId: string;
-  year: number;
-  month: number;
-}
-
-export interface MonthData {
-  month: BudgetMonth;
+export interface UserData {
   incomeEntries: IncomeEntry[];
   budgetEntries: BudgetEntry[];
 }
@@ -51,21 +40,6 @@ export const CATEGORY_RATIOS: Record<Category, number> = {
   savings: 0.2,
 };
 
-export const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
@@ -74,7 +48,7 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export function computeBudgetStats(data: MonthData) {
+export function computeBudgetStats(data: UserData) {
   const totalIncome = data.incomeEntries.reduce((s, e) => s + e.amount, 0);
 
   const categories = (["needs", "wants", "savings"] as Category[]).map((cat) => {

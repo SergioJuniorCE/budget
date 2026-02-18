@@ -5,7 +5,7 @@ import {
   CATEGORY_LABELS,
   CATEGORY_RATIOS,
   formatCurrency,
-  type MonthData,
+  type UserData,
   computeBudgetStats,
 } from "./types";
 
@@ -22,7 +22,7 @@ const CATEGORY_TEXT: Record<Category, string> = {
 };
 
 interface OverviewPanelProps {
-  data: MonthData;
+  data: UserData;
 }
 
 export function OverviewPanel({ data }: OverviewPanelProps) {
