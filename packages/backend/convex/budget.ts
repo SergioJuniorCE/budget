@@ -246,6 +246,83 @@ export const reorderIncomeEntries = mutation({
   },
 });
 
+// ─── Import/Export ────────────────────────────────────────────────────────────
+
+const incomeEntryImportValidator = v.object({
+  name: v.string(),
+  amount: v.number(),
+  note: v.optional(v.string()),
+});
+
+const budgetEntryImportValidator = v.object({
+  name: v.string(),
+  amount: v.number(),
+  category: categoryValidator,
+  quincena: quincenaValidator,
+  note: v.optional(v.string()),
+  paid: v.optional(v.boolean()),
+});
+
+export const importData = mutation({
+  args: {
+    mode: v.union(v.literal("merge"), v.literal("replace")),
+    incomeEntries: v.array(incomeEntryImportValidator),
+    budgetEntries: v.array(budgetEntryImportValidator),
+  },
+  returns: v.object({
+    incomeCount: v.number(),
+    budgetCount: v.number(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx);
+
+    if (args.mode === "replace") {
+      const existingIncome = await ctx.db
+        .query("incomeEntries")
+        .withIndex("by_user", (q) => q.eq("userId", user.userId))
+        .collect();
+      for (const entry of existingIncome) {
+        await ctx.db.delete("incomeEntries", entry._id);
+      }
+
+      const existingBudget = await ctx.db
+        .query("budgetEntries")
+        .withIndex("by_user", (q) => q.eq("userId", user.userId))
+        .collect();
+      for (const entry of existingBudget) {
+        await ctx.db.delete("budgetEntries", entry._id);
+      }
+    }
+
+    let incomeCount = 0;
+    for (const entry of args.incomeEntries) {
+      await ctx.db.insert("incomeEntries", {
+        userId: user.userId,
+        name: entry.name,
+        amount: entry.amount,
+        note: entry.note,
+      });
+      incomeCount++;
+    }
+
+    let budgetCount = 0;
+    for (const entry of args.budgetEntries) {
+      await ctx.db.insert("budgetEntries", {
+        userId: user.userId,
+        name: entry.name,
+        amount: entry.amount,
+        category: entry.category,
+        quincena: entry.quincena,
+        note: entry.note,
+        paid: entry.paid,
+      });
+      budgetCount++;
+    }
+
+    return { incomeCount, budgetCount };
+  },
+});
+
 // ─── One-time Migration ──────────────────────────────────────────────────────
 // Run once via the Convex dashboard to strip the legacy `budgetMonthId` field
 // from all existing documents. After running, remove the optional field from

@@ -28,7 +28,8 @@
     "deploy": "turbo -F @budget/infra deploy",
     "deploy:backend": "turbo -F @budget/backend deploy",
     "destroy": "turbo -F @budget/infra destroy",
-    "check": "oxlint && oxfmt --write"
+    "check": "oxlint && oxfmt --write",
+    "lint:check": "oxlint && oxfmt --check"
   },
   "dependencies": {
     "@budget/env": "workspace:*",

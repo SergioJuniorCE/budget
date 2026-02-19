@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Authenticated } from "convex/react";
 
+import { ExportImportButton } from "./ExportImportButton";
 import { HeaderShareButton } from "./HeaderShareButton";
 import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
@@ -53,6 +54,7 @@ export default function Header() {
         {/* Right-side actions */}
         <div className="flex items-center gap-1.5 shrink-0">
           <HeaderShareButton />
+          <ExportImportButton />
           <ModeToggle />
           <Authenticated>
             <UserMenu />
