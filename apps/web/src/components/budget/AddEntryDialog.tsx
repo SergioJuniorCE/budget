@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useReducer, useRef, useState } from "react";
 import type { ClipboardEvent } from "react";
 import { PlusIcon } from "lucide-react";
 
@@ -106,7 +106,6 @@ export function AddIncomeDialog({ onAdd }: AddIncomeDialogProps) {
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit(false)}
               onPaste={handleNamePaste}
-              autoFocus
             />
           </div>
           <div className="grid gap-1">
@@ -160,35 +159,90 @@ interface AddBudgetEntryDialogProps {
   ) => void;
 }
 
+type BudgetFormState = {
+  open: boolean;
+  name: string;
+  amount: string;
+  category: Category;
+  quincena: Quincena;
+  note: string;
+};
+
+type BudgetFormAction =
+  | { type: "open"; category: Category; quincena: Quincena }
+  | { type: "close" }
+  | { type: "reset"; category: Category; quincena: Quincena }
+  | { type: "setName"; value: string }
+  | { type: "setAmount"; value: string }
+  | { type: "setCategory"; value: Category }
+  | { type: "setQuincena"; value: Quincena }
+  | { type: "setNote"; value: string };
+
+function budgetFormReducer(state: BudgetFormState, action: BudgetFormAction): BudgetFormState {
+  switch (action.type) {
+    case "open":
+    case "reset":
+      return {
+        open: true,
+        name: "",
+        amount: "",
+        category: action.category,
+        quincena: action.quincena,
+        note: "",
+      };
+    case "close":
+      return { ...state, open: false };
+    case "setName":
+      return { ...state, name: action.value };
+    case "setAmount":
+      return { ...state, amount: action.value };
+    case "setCategory":
+      return { ...state, category: action.value };
+    case "setQuincena":
+      return { ...state, quincena: action.value };
+    case "setNote":
+      return { ...state, note: action.value };
+  }
+}
+
 export function AddBudgetEntryDialog({
   defaultCategory = "needs",
   defaultQuincena = "1ra",
   onAdd,
 }: AddBudgetEntryDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<Category>(defaultCategory);
-  const [quincena, setQuincena] = useState<Quincena>(defaultQuincena);
-  const [note, setNote] = useState("");
+  const [form, dispatch] = useReducer(budgetFormReducer, {
+    open: false,
+    name: "",
+    amount: "",
+    category: defaultCategory,
+    quincena: defaultQuincena,
+    note: "",
+  });
   const nameRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
 
   function reset() {
-    setName("");
-    setAmount("");
-    setNote("");
+    dispatch({ type: "reset", category: defaultCategory, quincena: defaultQuincena });
     setTimeout(() => nameRef.current?.focus(), 0);
   }
 
+  function handleOpenChange(newOpen: boolean) {
+    if (newOpen) {
+      dispatch({ type: "open", category: defaultCategory, quincena: defaultQuincena });
+      setTimeout(() => nameRef.current?.focus(), 0);
+    } else {
+      dispatch({ type: "close" });
+    }
+  }
+
   function submit(keepOpen: boolean) {
-    const parsed = parseFloat(amount);
-    if (!name.trim() || isNaN(parsed) || parsed < 0) return;
-    onAdd(name.trim(), parsed, category, quincena, note.trim() || undefined);
+    const parsed = parseFloat(form.amount);
+    if (!form.name.trim() || isNaN(parsed) || parsed < 0) return;
+    onAdd(form.name.trim(), parsed, form.category, form.quincena, form.note.trim() || undefined);
     if (keepOpen) {
       reset();
     } else {
-      setOpen(false);
+      dispatch({ type: "close" });
     }
   }
 
@@ -197,13 +251,13 @@ export function AddBudgetEntryDialog({
     const row = parseExcelRow(text);
     if (!row) return;
     e.preventDefault();
-    setName(row.name);
-    setAmount(String(row.amount));
+    dispatch({ type: "setName", value: row.name });
+    dispatch({ type: "setAmount", value: String(row.amount) });
     setTimeout(() => amountRef.current?.focus(), 0);
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={form.open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
           <Button variant="outline" size="sm">
@@ -222,11 +276,10 @@ export function AddBudgetEntryDialog({
             <Input
               ref={nameRef}
               placeholder="e.g. Renta — or paste a row from Excel"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={form.name}
+              onChange={(e) => dispatch({ type: "setName", value: e.target.value })}
               onKeyDown={(e) => e.key === "Enter" && submit(false)}
               onPaste={handleNamePaste}
-              autoFocus
             />
           </div>
           <div className="grid gap-1">
@@ -237,15 +290,18 @@ export function AddBudgetEntryDialog({
               min="0"
               step="0.01"
               placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              value={form.amount}
+              onChange={(e) => dispatch({ type: "setAmount", value: e.target.value })}
               onKeyDown={(e) => e.key === "Enter" && submit(false)}
             />
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div className="grid gap-1">
               <Label>Category</Label>
-              <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
+              <Select
+                value={form.category}
+                onValueChange={(v) => dispatch({ type: "setCategory", value: v as Category })}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -258,7 +314,10 @@ export function AddBudgetEntryDialog({
             </div>
             <div className="grid gap-1">
               <Label>Quincena</Label>
-              <Select value={quincena} onValueChange={(v) => setQuincena(v as Quincena)}>
+              <Select
+                value={form.quincena}
+                onValueChange={(v) => dispatch({ type: "setQuincena", value: v as Quincena })}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -273,8 +332,8 @@ export function AddBudgetEntryDialog({
             <Label>Note (optional)</Label>
             <Input
               placeholder="Optional note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
+              value={form.note}
+              onChange={(e) => dispatch({ type: "setNote", value: e.target.value })}
               onKeyDown={(e) => e.key === "Enter" && submit(false)}
             />
           </div>

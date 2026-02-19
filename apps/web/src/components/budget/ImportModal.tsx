@@ -1,6 +1,6 @@
 import { api } from "@budget/backend/convex/_generated/api";
 import { useMutation } from "convex/react";
-import { useRef, useState } from "react";
+import { useReducer, useRef } from "react";
 import { toast } from "sonner";
 import { Upload, AlertTriangle, Check } from "lucide-react";
 import {
@@ -32,13 +32,60 @@ interface ImportData {
   }>;
 }
 
+type ImportState = {
+  open: boolean;
+  file: File | null;
+  preview: ImportData | null;
+  mode: "merge" | "replace";
+  importing: boolean;
+};
+
+type ImportAction =
+  | { type: "openDialog" }
+  | { type: "closeDialog" }
+  | { type: "setFile"; file: File }
+  | { type: "setPreview"; preview: ImportData }
+  | { type: "clearPreview" }
+  | { type: "setMode"; mode: "merge" | "replace" }
+  | { type: "startImport" }
+  | { type: "finishImport" }
+  | { type: "reset" };
+
+const initialImportState: ImportState = {
+  open: false,
+  file: null,
+  preview: null,
+  mode: "merge",
+  importing: false,
+};
+
+function importReducer(state: ImportState, action: ImportAction): ImportState {
+  switch (action.type) {
+    case "openDialog":
+      return { ...state, open: true };
+    case "closeDialog":
+      return { ...initialImportState };
+    case "setFile":
+      return { ...state, file: action.file };
+    case "setPreview":
+      return { ...state, preview: action.preview };
+    case "clearPreview":
+      return { ...state, preview: null };
+    case "setMode":
+      return { ...state, mode: action.mode };
+    case "startImport":
+      return { ...state, importing: true };
+    case "finishImport":
+      return { ...state, importing: false };
+    case "reset":
+      return { ...initialImportState, open: state.open };
+  }
+}
+
 export function ImportModal() {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<ImportData | null>(null);
-  const [mode, setMode] = useState<"merge" | "replace">("merge");
-  const [importing, setImporting] = useState(false);
+  const [state, dispatch] = useReducer(importReducer, initialImportState);
+  const { open, file, preview, mode, importing } = state;
 
   const importData = useMutation(api.budget.importData);
 
@@ -46,20 +93,20 @@ export function ImportModal() {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    setFile(selectedFile);
+    dispatch({ type: "setFile", file: selectedFile });
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
         if (!parsed.incomeEntries || !parsed.budgetEntries) {
           toast.error("Invalid file format");
-          setPreview(null);
+          dispatch({ type: "clearPreview" });
           return;
         }
-        setPreview(parsed as ImportData);
+        dispatch({ type: "setPreview", preview: parsed as ImportData });
       } catch {
         toast.error("Failed to parse JSON file");
-        setPreview(null);
+        dispatch({ type: "clearPreview" });
       }
     };
     reader.readAsText(selectedFile);
@@ -68,7 +115,7 @@ export function ImportModal() {
   async function handleImport() {
     if (!preview) return;
 
-    setImporting(true);
+    dispatch({ type: "startImport" });
     try {
       const result = await importData({
         mode,
@@ -78,28 +125,20 @@ export function ImportModal() {
       toast.success(
         `Imported ${result.incomeCount} income and ${result.budgetCount} budget entries`,
       );
-      setOpen(false);
-      setFile(null);
-      setPreview(null);
+      dispatch({ type: "closeDialog" });
     } catch {
       toast.error("Failed to import data");
     } finally {
-      setImporting(false);
+      dispatch({ type: "finishImport" });
     }
-  }
-
-  function resetState() {
-    setFile(null);
-    setPreview(null);
-    setMode("merge");
   }
 
   return (
     <Dialog
       open={open}
       onOpenChange={(o) => {
-        setOpen(o);
-        if (!o) resetState();
+        if (o) dispatch({ type: "openDialog" });
+        else dispatch({ type: "closeDialog" });
       }}
     >
       <DialogTrigger
@@ -122,6 +161,9 @@ export function ImportModal() {
           <div
             className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
             onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+            role="button"
+            tabIndex={0}
           >
             <input
               ref={fileInputRef}
@@ -157,7 +199,7 @@ export function ImportModal() {
                   <Button
                     variant={mode === "merge" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setMode("merge")}
+                    onClick={() => dispatch({ type: "setMode", mode: "merge" })}
                     className="flex-1"
                   >
                     Merge
@@ -165,7 +207,7 @@ export function ImportModal() {
                   <Button
                     variant={mode === "replace" ? "destructive" : "outline"}
                     size="sm"
-                    onClick={() => setMode("replace")}
+                    onClick={() => dispatch({ type: "setMode", mode: "replace" })}
                     className="flex-1"
                   >
                     Replace

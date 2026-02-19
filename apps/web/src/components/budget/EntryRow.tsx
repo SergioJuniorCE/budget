@@ -38,37 +38,37 @@ export function EntryRow({
   className,
   dragHandle,
 }: EntryRowProps) {
-  const [editing, setEditing] = useState(false);
-  const [editName, setEditName] = useState(name);
-  const [editAmount, setEditAmount] = useState(String(amount));
+  const [editState, setEditState] = useState<{ name: string; amount: string } | null>(null);
+
+  function startEditing() {
+    setEditState({ name, amount: String(amount) });
+  }
 
   function handleSave() {
-    const parsed = parseFloat(editAmount);
-    if (!editName.trim() || isNaN(parsed) || parsed < 0) return;
-    onEdit(editName.trim(), parsed, note);
-    setEditing(false);
+    if (!editState) return;
+    const parsed = parseFloat(editState.amount);
+    if (!editState.name.trim() || isNaN(parsed) || parsed < 0) return;
+    onEdit(editState.name.trim(), parsed, note);
+    setEditState(null);
   }
 
   function handleCancel() {
-    setEditName(name);
-    setEditAmount(String(amount));
-    setEditing(false);
+    setEditState(null);
   }
 
-  if (editing) {
+  if (editState) {
     return (
       <div className={cn("flex items-center gap-1 py-1 border-b border-border/50", className)}>
         <Input
           className="h-6 flex-1 min-w-0 text-xs px-1"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
+          value={editState.name}
+          onChange={(e) => setEditState((s) => s && { ...s, name: e.target.value })}
           onKeyDown={(e) => e.key === "Enter" && handleSave()}
-          autoFocus
         />
         <Input
           className="h-6 w-20 text-xs px-1 tabular-nums"
-          value={editAmount}
-          onChange={(e) => setEditAmount(e.target.value)}
+          value={editState.amount}
+          onChange={(e) => setEditState((s) => s && { ...s, amount: e.target.value })}
           onKeyDown={(e) => e.key === "Enter" && handleSave()}
           type="number"
           min="0"
@@ -86,7 +86,7 @@ export function EntryRow({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger asChild>
+      <ContextMenuTrigger>
         <div
           className={cn(
             "group flex items-center gap-1 py-1 border-b border-border/50 transition-opacity",
@@ -117,7 +117,7 @@ export function EntryRow({
         </div>
       </ContextMenuTrigger>
       <ContextMenuContent>
-        <ContextMenuItem onClick={() => setEditing(true)}>
+        <ContextMenuItem onClick={startEditing}>
           <PencilIcon className="mr-2 h-3.5 w-3.5" /> Edit
         </ContextMenuItem>
         <ContextMenuSeparator />
