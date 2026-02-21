@@ -56,11 +56,9 @@ export function ShareModal({ data }: ShareModalProps) {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Share2 className="size-3.5" />
-          Share
-        </Button>
+      <DialogTrigger render={<Button variant="outline" size="sm" className="gap-1.5" />}>
+        <Share2 className="size-3.5" />
+        Share
       </DialogTrigger>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>

@@ -1,16 +1,8 @@
-import { lazy, Suspense } from "react";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { CATEGORY_LABELS, CATEGORY_RATIOS, formatCurrency, type UserData } from "./types";
 import type { Category } from "./types";
-
-const PieChart = lazy(() => import("recharts").then((m) => ({ default: m.PieChart })));
-const Pie = lazy(() => import("recharts").then((m) => ({ default: m.Pie })));
-const Cell = lazy(() => import("recharts").then((m) => ({ default: m.Cell })));
-const ResponsiveContainer = lazy(() =>
-  import("recharts").then((m) => ({ default: m.ResponsiveContainer })),
-);
-const Tooltip = lazy(() => import("recharts").then((m) => ({ default: m.Tooltip })));
 
 const CATEGORY_FILL: Record<Category, string> = {
   needs: "var(--color-needs)",
@@ -96,42 +88,34 @@ export function BudgetDonutChart({ data }: BudgetDonutChartProps) {
                 --color-remaining: #a855f7;
               }
             `}</style>
-            <div className="h-36">
-              <Suspense
-                fallback={
-                  <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-                    Loading chart...
-                  </div>
-                }
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      dataKey="value"
-                      innerRadius="55%"
-                      outerRadius="80%"
-                      paddingAngle={2}
-                      startAngle={90}
-                      endAngle={-270}
-                    >
-                      {chartData.map((entry) => (
-                        <Cell
-                          key={entry.cat}
-                          fill={
-                            entry.cat === "remaining"
-                              ? "var(--color-remaining)"
-                              : entry.cat
-                                ? CATEGORY_FILL[entry.cat as Category]
-                                : "var(--muted)"
-                          }
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Suspense>
+            <div className="h-36 min-w-0 flex items-center justify-center">
+              <PieChart width={220} height={140}>
+                <Pie
+                  data={chartData}
+                  dataKey="value"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={32}
+                  outerRadius={50}
+                  paddingAngle={2}
+                  startAngle={90}
+                  endAngle={-270}
+                >
+                  {chartData.map((entry) => (
+                    <Cell
+                      key={entry.cat}
+                      fill={
+                        entry.cat === "remaining"
+                          ? "var(--color-remaining)"
+                          : entry.cat
+                            ? CATEGORY_FILL[entry.cat as Category]
+                            : "var(--muted)"
+                      }
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+              </PieChart>
             </div>
 
             <div className="mt-3 space-y-2">

@@ -1,9 +1,6 @@
-import { api } from "@budget/backend/convex/_generated/api";
-import { useQuery } from "convex/react";
 import { Download } from "lucide-react";
 import { useRouterState } from "@tanstack/react-router";
 import { ImportModal } from "./budget/ImportModal";
-import type { UserData } from "./budget/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,15 +8,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useDashboardDataOptional } from "@/contexts/DashboardDataContext";
 
 export function ExportImportButton() {
   const routerState = useRouterState();
   const isDashboard = routerState.location.pathname === "/dashboard";
-  const rawData = useQuery(api.budget.getData, isDashboard ? {} : "skip");
+  const { data } = useDashboardDataOptional();
 
-  if (!isDashboard || !rawData) return null;
-
-  const data: UserData = rawData;
+  if (!isDashboard || !data) return null;
 
   function handleExport() {
     const exportData = {

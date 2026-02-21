@@ -1,17 +1,15 @@
-import { api } from "@budget/backend/convex/_generated/api";
-import { Authenticated, useQuery } from "convex/react";
+import { Authenticated } from "convex/react";
 import { useRouterState } from "@tanstack/react-router";
 import { ShareModal } from "./budget/ShareModal";
-import type { UserData } from "./budget/types";
+import { useDashboardDataOptional } from "@/contexts/DashboardDataContext";
 
 function ShareButtonInner() {
   const routerState = useRouterState();
   const isDashboard = routerState.location.pathname === "/dashboard";
-  const rawData = useQuery(api.budget.getData, isDashboard ? {} : "skip");
+  const { data } = useDashboardDataOptional();
 
-  if (!isDashboard || !rawData) return null;
+  if (!isDashboard || !data) return null;
 
-  const data: UserData = rawData;
   return <ShareModal data={data} />;
 }
 

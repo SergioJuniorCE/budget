@@ -137,6 +137,7 @@ export function ImportModal() {
     <Dialog
       open={open}
       onOpenChange={(o) => {
+        if (o === open) return;
         if (o) dispatch({ type: "openDialog" });
         else dispatch({ type: "closeDialog" });
       }}

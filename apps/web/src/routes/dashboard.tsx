@@ -1,8 +1,8 @@
 import { api } from "@budget/backend/convex/_generated/api";
 import type { Id } from "@budget/backend/convex/_generated/dataModel";
 import { createFileRoute } from "@tanstack/react-router";
-import { Authenticated, AuthLoading, Unauthenticated, useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { Authenticated, AuthLoading, Unauthenticated, useMutation } from "convex/react";
+import { useCallback, useState } from "react";
 
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
@@ -11,7 +11,8 @@ import { BudgetDonutChart } from "@/components/budget/BudgetDonutChart";
 import { CategorySection } from "@/components/budget/CategorySection";
 import { IncomeSection } from "@/components/budget/IncomeSection";
 import { OverviewPanel } from "@/components/budget/OverviewPanel";
-import type { Category, UserData, Quincena } from "@/components/budget/types";
+import type { Category, Quincena } from "@/components/budget/types";
+import { DashboardDataProvider, useDashboardData } from "@/contexts/DashboardDataContext";
 
 export const Route = createFileRoute("/dashboard")({
   component: RouteComponent,
@@ -23,7 +24,9 @@ function RouteComponent() {
   return (
     <>
       <Authenticated>
-        <BudgetDashboard />
+        <DashboardDataProvider>
+          <BudgetDashboard />
+        </DashboardDataProvider>
       </Authenticated>
       <Unauthenticated>
         <div className="flex items-center justify-center min-h-[60vh]">
@@ -50,7 +53,7 @@ function RouteComponent() {
 }
 
 function BudgetDashboard() {
-  const rawData = useQuery(api.budget.getData, {});
+  const { data: rawData, isLoading } = useDashboardData();
 
   const upsertIncome = useMutation(api.budget.upsertIncomeEntry);
   const deleteIncome = useMutation(api.budget.deleteIncomeEntry);
@@ -92,66 +95,86 @@ function BudgetDashboard() {
     },
   );
 
-  // ── Income handlers ────────────────────────────────────────────────────────
+  const handleAddIncome = useCallback(
+    (name: string, amount: number, note?: string) => {
+      upsertIncome({ name, amount, note });
+    },
+    [upsertIncome],
+  );
 
-  function handleAddIncome(name: string, amount: number, note?: string) {
-    upsertIncome({ name, amount, note });
-  }
+  const handleEditIncome = useCallback(
+    (id: Id<"incomeEntries">, name: string, amount: number, note?: string) => {
+      upsertIncome({ id, name, amount, note });
+    },
+    [upsertIncome],
+  );
 
-  function handleEditIncome(id: Id<"incomeEntries">, name: string, amount: number, note?: string) {
-    upsertIncome({ id, name, amount, note });
-  }
+  const handleDeleteIncome = useCallback(
+    (id: Id<"incomeEntries">) => {
+      deleteIncome({ id });
+    },
+    [deleteIncome],
+  );
 
-  function handleDeleteIncome(id: Id<"incomeEntries">) {
-    deleteIncome({ id });
-  }
+  const handleReorderIncome = useCallback(
+    (ids: Id<"incomeEntries">[]) => {
+      reorderIncome({ ids });
+    },
+    [reorderIncome],
+  );
 
-  function handleReorderIncome(ids: Id<"incomeEntries">[]) {
-    reorderIncome({ ids });
-  }
+  const handleAddEntry = useCallback(
+    (name: string, amount: number, category: Category, quincena: Quincena, note?: string) => {
+      upsertEntry({ name, amount, category, quincena, note });
+    },
+    [upsertEntry],
+  );
 
-  // ── Budget entry handlers ──────────────────────────────────────────────────
+  const handleEditEntry = useCallback(
+    (id: Id<"budgetEntries">, name: string, amount: number, note?: string) => {
+      const entry = rawData?.budgetEntries.find((e) => e._id === id);
+      if (!entry) return;
+      upsertEntry({
+        id,
+        name,
+        amount,
+        category: entry.category,
+        quincena: entry.quincena,
+        note,
+      });
+    },
+    [upsertEntry, rawData],
+  );
 
-  function handleAddEntry(
-    name: string,
-    amount: number,
-    category: Category,
-    quincena: Quincena,
-    note?: string,
-  ) {
-    upsertEntry({ name, amount, category, quincena, note });
-  }
+  const handleDeleteEntry = useCallback(
+    (id: Id<"budgetEntries">) => {
+      deleteEntry({ id });
+    },
+    [deleteEntry],
+  );
 
-  function handleEditEntry(id: Id<"budgetEntries">, name: string, amount: number, note?: string) {
-    const entry = rawData?.budgetEntries.find((e) => e._id === id);
-    if (!entry) return;
-    upsertEntry({
-      id,
-      name,
-      amount,
-      category: entry.category,
-      quincena: entry.quincena,
-      note,
-    });
-  }
+  const handleReorderEntries = useCallback(
+    (ids: Id<"budgetEntries">[]) => {
+      reorderEntries({ ids });
+    },
+    [reorderEntries],
+  );
 
-  function handleDeleteEntry(id: Id<"budgetEntries">) {
-    deleteEntry({ id });
-  }
+  const handleTogglePaid = useCallback(
+    (id: Id<"budgetEntries">, paid: boolean) => {
+      togglePaid({ id, paid });
+    },
+    [togglePaid],
+  );
 
-  function handleReorderEntries(ids: Id<"budgetEntries">[]) {
-    reorderEntries({ ids });
-  }
+  const handleResetQuincena = useCallback(
+    (quincena: Quincena) => {
+      resetQuincena({ quincena });
+    },
+    [resetQuincena],
+  );
 
-  function handleTogglePaid(id: Id<"budgetEntries">, paid: boolean) {
-    togglePaid({ id, paid });
-  }
-
-  function handleResetQuincena(quincena: Quincena) {
-    resetQuincena({ quincena });
-  }
-
-  if (rawData === undefined) {
+  if (isLoading || !rawData) {
     return (
       <div className="space-y-4 py-4 md:py-6 px-4">
         <Skeleton className="h-40 w-full" />
@@ -164,13 +187,11 @@ function BudgetDashboard() {
     );
   }
 
-  const data: UserData = rawData;
+  const needsEntries = rawData.budgetEntries.filter((e) => e.category === "needs");
+  const wantsEntries = rawData.budgetEntries.filter((e) => e.category === "wants");
+  const savingsEntries = rawData.budgetEntries.filter((e) => e.category === "savings");
 
-  const needsEntries = data.budgetEntries.filter((e) => e.category === "needs");
-  const wantsEntries = data.budgetEntries.filter((e) => e.category === "wants");
-  const savingsEntries = data.budgetEntries.filter((e) => e.category === "savings");
-
-  const totalIncome = data.incomeEntries.reduce((s, e) => s + e.amount, 0);
+  const totalIncome = rawData.incomeEntries.reduce((s, e) => s + e.amount, 0);
   const needsBudget = totalIncome * 0.5;
   const wantsBudget = totalIncome * 0.3;
   const savingsBudget = totalIncome * 0.2;
@@ -181,11 +202,10 @@ function BudgetDashboard() {
 
   return (
     <div className="space-y-4 py-4 md:py-6 px-4">
-      {/* Top row: Income + Overview + Donut */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div>
           <IncomeSection
-            entries={data.incomeEntries}
+            entries={rawData.incomeEntries}
             onAdd={handleAddIncome}
             onEdit={handleEditIncome}
             onDelete={handleDeleteIncome}
@@ -193,14 +213,13 @@ function BudgetDashboard() {
           />
         </div>
         <div>
-          <OverviewPanel data={data} />
+          <OverviewPanel data={rawData} />
         </div>
         <div>
-          <BudgetDonutChart data={data} />
+          <BudgetDonutChart data={rawData} />
         </div>
       </div>
 
-      {/* Bottom row: Needs / Wants / Savings */}
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Expenses
