@@ -10,15 +10,15 @@ import {
 } from "./types";
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  needs: "bg-blue-500",
-  wants: "bg-amber-500",
-  savings: "bg-emerald-500",
+  needs: "bg-needs",
+  wants: "bg-wants",
+  savings: "bg-savings",
 };
 
 const CATEGORY_TEXT: Record<Category, string> = {
-  needs: "text-blue-600 dark:text-blue-400",
-  wants: "text-amber-600 dark:text-amber-400",
-  savings: "text-emerald-600 dark:text-emerald-400",
+  needs: "text-needs",
+  wants: "text-wants",
+  savings: "text-savings",
 };
 
 interface OverviewPanelProps {
@@ -49,7 +49,7 @@ export function OverviewPanel({ data }: OverviewPanelProps) {
             const overBudget = current > budget;
             return (
               <div key={cat} className="mb-3">
-                <div className="grid grid-cols-4 gap-1 items-center mb-1">
+                <div className="grid grid-cols-4 gap-1 items-center mb-1.5">
                   <span className={cn("text-xs font-medium", CATEGORY_TEXT[cat])}>
                     {CATEGORY_LABELS[cat]} ({Math.round(CATEGORY_RATIOS[cat] * 100)}%)
                   </span>
@@ -68,10 +68,10 @@ export function OverviewPanel({ data }: OverviewPanelProps) {
                     {formatCurrency(spendable)}
                   </span>
                 </div>
-                <div className="h-1 w-full bg-muted rounded-none overflow-hidden">
+                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                   <div
                     className={cn(
-                      "h-full transition-all",
+                      "h-full rounded-full transition-all duration-500",
                       overBudget ? "bg-destructive" : CATEGORY_COLORS[cat],
                     )}
                     style={{ width: `${pct}%` }}
@@ -89,9 +89,7 @@ export function OverviewPanel({ data }: OverviewPanelProps) {
             <span
               className={cn(
                 "text-xs tabular-nums font-semibold",
-                totalNotAssigned < 0
-                  ? "text-destructive"
-                  : "text-emerald-600 dark:text-emerald-400",
+                totalNotAssigned < 0 ? "text-destructive" : "text-savings",
               )}
             >
               {formatCurrency(totalNotAssigned)}
@@ -120,7 +118,7 @@ export function OverviewPanel({ data }: OverviewPanelProps) {
             <span
               className={cn(
                 "text-xs tabular-nums font-bold",
-                totalRestante < 0 ? "text-destructive" : "text-emerald-600 dark:text-emerald-400",
+                totalRestante < 0 ? "text-destructive" : "text-savings",
               )}
             >
               {formatCurrency(totalRestante)}

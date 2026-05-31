@@ -22,15 +22,15 @@ import {
 } from "./types";
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  needs: "text-blue-600 dark:text-blue-400",
-  wants: "text-amber-600 dark:text-amber-400",
-  savings: "text-emerald-600 dark:text-emerald-400",
+  needs: "text-needs",
+  wants: "text-wants",
+  savings: "text-savings",
 };
 
 const CATEGORY_BG: Record<Category, string> = {
-  needs: "bg-blue-500",
-  wants: "bg-amber-500",
-  savings: "bg-emerald-500",
+  needs: "bg-needs",
+  wants: "bg-wants",
+  savings: "bg-savings",
 };
 
 function sortedEntries(entries: BudgetEntry[]): BudgetEntry[] {
@@ -92,11 +92,11 @@ export function CategorySection({
           </div>
           <AddBudgetEntryDialog defaultCategory={category} onAdd={onAdd} />
         </CardTitle>
-        <div className="mt-2 space-y-1">
-          <div className="h-1.5 w-full bg-muted rounded-none overflow-hidden">
+        <div className="mt-2 space-y-1.5">
+          <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
             <div
               className={cn(
-                "h-full transition-all",
+                "h-full rounded-full transition-all duration-500",
                 CATEGORY_BG[category],
                 overBudget && "bg-destructive",
               )}

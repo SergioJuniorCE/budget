@@ -1,10 +1,9 @@
-import { useAuth } from "@clerk/react";
 import { HeadContent, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
+import { useAuth } from "@clerk/react";
 
-import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -21,11 +20,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "budget",
+        title: "Better Track",
       },
       {
         name: "description",
-        content: "budget is a web application",
+        content: "Personal budget tracking with the 50/30/20 rule",
       },
     ],
     links: [
@@ -47,11 +46,8 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <div className="min-h-svh flex flex-col">
-          <Header />
-          <main className="flex-1">
-            <Outlet />
-          </main>
+        <div className="min-h-svh">
+          <Outlet />
         </div>
         <Toaster richColors />
       </ThemeProvider>

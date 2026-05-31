@@ -11,9 +11,9 @@ const CATEGORY_FILL: Record<Category, string> = {
 };
 
 const CATEGORY_TEXT: Record<Category, string> = {
-  needs: "text-blue-600 dark:text-blue-400",
-  wants: "text-amber-600 dark:text-amber-400",
-  savings: "text-emerald-600 dark:text-emerald-400",
+  needs: "text-needs",
+  wants: "text-wants",
+  savings: "text-savings",
 };
 
 interface BudgetDonutChartProps {
@@ -30,7 +30,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: Toolti
   if (!active || !payload?.length) return null;
   const item = payload[0];
   return (
-    <div className="rounded border bg-popover px-2.5 py-1.5 text-xs shadow-md">
+    <div className="rounded-lg border bg-popover px-2.5 py-1.5 text-xs shadow-md">
       <p className="font-medium">{item.payload.label}</p>
       <p className="tabular-nums text-muted-foreground">{formatCurrency(item.value)}</p>
       <p className="tabular-nums text-muted-foreground">
@@ -80,14 +80,6 @@ export function BudgetDonutChart({ data }: BudgetDonutChartProps) {
           </p>
         ) : (
           <>
-            <style>{`
-              :root {
-                --color-needs: #3b82f6;
-                --color-wants: #f59e0b;
-                --color-savings: #10b981;
-                --color-remaining: #a855f7;
-              }
-            `}</style>
             <div className="h-36 min-w-0 flex items-center justify-center">
               <PieChart width={220} height={140}>
                 <Pie
@@ -127,9 +119,9 @@ export function BudgetDonutChart({ data }: BudgetDonutChartProps) {
                       <span
                         className={cn(
                           "inline-block h-2 w-2 rounded-full shrink-0",
-                          cat === "needs" && "bg-blue-500",
-                          cat === "wants" && "bg-amber-500",
-                          cat === "savings" && "bg-emerald-500",
+                          cat === "needs" && "bg-needs",
+                          cat === "wants" && "bg-wants",
+                          cat === "savings" && "bg-savings",
                         )}
                       />
                       <span className={cn("text-xs font-medium", CATEGORY_TEXT[cat])}>{label}</span>
@@ -155,12 +147,10 @@ export function BudgetDonutChart({ data }: BudgetDonutChartProps) {
               {unassigned > 0 && (
                 <div className="flex items-center justify-between gap-2 border-t pt-2 mt-1">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="inline-block h-2 w-2 rounded-full shrink-0 bg-purple-500" />
-                    <span className="text-xs font-medium text-purple-600 dark:text-purple-400">
-                      Remaining
-                    </span>
+                    <span className="inline-block h-2 w-2 rounded-full shrink-0 bg-remaining" />
+                    <span className="text-xs font-medium text-remaining">Remaining</span>
                   </div>
-                  <span className="tabular-nums text-xs font-semibold text-purple-600 dark:text-purple-400">
+                  <span className="tabular-nums text-xs font-semibold text-remaining">
                     {formatCurrency(unassigned)}
                   </span>
                 </div>

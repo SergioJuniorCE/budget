@@ -1,12 +1,9 @@
-import { Show } from "@clerk/react";
 import { api } from "@budget/backend/convex/_generated/api";
 import type { Id } from "@budget/backend/convex/_generated/dataModel";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 
-import SignInForm from "@/components/sign-in-form";
-import SignUpForm from "@/components/sign-up-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BudgetDonutChart } from "@/components/budget/BudgetDonutChart";
 import { CategorySection } from "@/components/budget/CategorySection";
@@ -15,30 +12,15 @@ import { OverviewPanel } from "@/components/budget/OverviewPanel";
 import type { Category, Quincena } from "@/components/budget/types";
 import { DashboardDataProvider, useDashboardData } from "@/contexts/DashboardDataContext";
 
-export const Route = createFileRoute("/dashboard")({
-  component: RouteComponent,
+export const Route = createFileRoute("/_dashboard/dashboard")({
+  component: DashboardPage,
 });
 
-function RouteComponent() {
-  const [showSignIn, setShowSignIn] = useState(false);
-
+function DashboardPage() {
   return (
-    <>
-      <Show when="signed-in">
-        <DashboardDataProvider>
-          <BudgetDashboard />
-        </DashboardDataProvider>
-      </Show>
-      <Show when="signed-out" fallback={null}>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          {showSignIn ? (
-            <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
-          ) : (
-            <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
-          )}
-        </div>
-      </Show>
-    </>
+    <DashboardDataProvider>
+      <BudgetDashboard />
+    </DashboardDataProvider>
   );
 }
 

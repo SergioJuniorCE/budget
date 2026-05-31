@@ -210,12 +210,14 @@ export function AddBudgetEntryDialog({
   defaultQuincena = "1ra",
   onAdd,
 }: AddBudgetEntryDialogProps) {
+  const [lastSelectedQuincena, setLastSelectedQuincena] = useState<Quincena | null>(null);
+
   const [form, dispatch] = useReducer(budgetFormReducer, {
     open: false,
     name: "",
     amount: "",
     category: defaultCategory,
-    quincena: defaultQuincena,
+    quincena: lastSelectedQuincena ?? defaultQuincena,
     note: "",
   });
   const nameRef = useRef<HTMLInputElement>(null);
