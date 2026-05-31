@@ -7,11 +7,15 @@ import { useAuth } from "@clerk/react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
-import { env } from "@budget/env/web";
-
 import "../index.css";
 
-const convex = new ConvexReactClient(env.VITE_CONVEX_URL);
+const VITE_CONVEX_URL = import.meta.env.VITE_CONVEX_URL;
+
+if (!VITE_CONVEX_URL) {
+  throw new Error("VITE_CONVEX_URL is not defined");
+}
+
+const convex = new ConvexReactClient(VITE_CONVEX_URL);
 
 interface RouterAppContext {}
 

@@ -1,0 +1,6 @@
+{
+  "extends": "@budget/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  }
+}

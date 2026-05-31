@@ -2,7 +2,6 @@ import { ClerkProvider } from "@clerk/react";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
 
-import { env } from "@budget/env/web";
 import Loader from "./components/loader";
 import { routeTree } from "./routeTree.gen";
 
@@ -25,10 +24,16 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
+const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!publishableKey) {
+  throw new Error("Clerk publishable key not found");
+}
+
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
-    <ClerkProvider afterSignOutUrl="/" publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY}>
+    <ClerkProvider afterSignOutUrl="/" publishableKey={publishableKey}>
       <RouterProvider router={router} />
     </ClerkProvider>,
   );

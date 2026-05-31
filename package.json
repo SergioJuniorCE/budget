@@ -6,26 +6,22 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
-    "dev:native": "turbo -F native dev",
-    "dev:web": "turbo -F web dev",
-    "dev:server": "turbo -F @budget/backend dev",
-    "dev:setup": "turbo -F @budget/backend dev:setup",
     "deploy:backend": "turbo -F @budget/backend deploy",
     "check": "oxlint && oxfmt --write",
     "lint:check": "oxlint && oxfmt --check",
     "test": "turbo test",
-    "test:web": "turbo -F @budget/web test",
-    "test:backend": "turbo -F @budget/backend test",
-    "test:coverage": "turbo test:coverage"
+    "test:coverage": "turbo test:coverage",
+    "backend:deploy": "npx convex deploy --dir packages/backend/convex",
+    "web:build": "pnpm --filter web build"
   },
   "dependencies": {
-    "@budget/env": "workspace:*",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@budget/config": "workspace:*",
     "@cloudflare/workers-types": "^4.20251213.0",
+    "@typescript/native-preview": "7.0.0-dev.20260527.2",
     "lefthook": "^2.0.13",
     "oxfmt": "^0.26.0",
     "oxlint": "^1.41.0",

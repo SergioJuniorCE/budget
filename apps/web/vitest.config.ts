@@ -19,7 +19,6 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@budget/backend": path.resolve(__dirname, "../../packages/backend"),
-      "@budget/env": path.resolve(__dirname, "../../packages/env"),
     },
   },
 });
