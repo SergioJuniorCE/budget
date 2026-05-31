@@ -13,7 +13,6 @@
   },
   "devDependencies": {
     "@budget/config": "workspace:*",
-    "@budget/infra": "workspace:*",
     "typescript": "catalog:"
   }
 }

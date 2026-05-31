@@ -1,9 +1,7 @@
 import { ConvexError, v } from "convex/values";
-import type { GenericMutationCtx } from "convex/server";
 
-import { authComponent } from "./auth";
+import { requireUser } from "./auth";
 import { internalMutation, mutation, query } from "./_generated/server";
-import type { DataModel } from "./_generated/dataModel";
 
 // ─── Validators ────────────────────────────────────────────────────────────
 
@@ -35,16 +33,6 @@ const budgetEntryValidator = v.object({
   budgetMonthId: v.optional(v.string()),
 });
 
-// ─── Helper ─────────────────────────────────────────────────────────────────
-
-async function requireUser(ctx: GenericMutationCtx<DataModel>) {
-  const user = await authComponent.safeGetAuthUser(ctx);
-  if (!user) {
-    throw new ConvexError("Not authenticated");
-  }
-  return { ...user, userId: String(user._id) };
-}
-
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export const getData = query({
@@ -54,10 +42,10 @@ export const getData = query({
     budgetEntries: v.array(budgetEntryValidator),
   }),
   handler: async (ctx) => {
-    const user = await authComponent.safeGetAuthUser(ctx);
-    if (!user) return { incomeEntries: [], budgetEntries: [] };
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return { incomeEntries: [], budgetEntries: [] };
 
-    const userId = String(user._id);
+    const userId = identity.subject;
 
     const incomeEntries = await ctx.db
       .query("incomeEntries")

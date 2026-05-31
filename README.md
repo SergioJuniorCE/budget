@@ -1,74 +1,69 @@
 # budget
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Router, Convex, and more.
+A budget tracking application built with React, TanStack Router, and Convex.
 
 ## Features
 
-- **TypeScript** - For type safety and improved developer experience
+- **TypeScript** - Type safety across the entire stack
 - **TanStack Router** - File-based routing with full type safety
-- **TailwindCSS** - Utility-first CSS for rapid UI development
+- **TailwindCSS** - Utility-first CSS
 - **shadcn/ui** - Reusable UI components
-- **Convex** - Reactive backend-as-a-service platform
-- **Authentication** - Better-Auth
-- **Oxlint** - Oxlint + Oxfmt (linting & formatting)
-- **Turborepo** - Optimized monorepo build system
+- **Convex** - Reactive backend-as-a-service
+- **Clerk** - Authentication
+- **Recharts** - Data visualization
+- **Oxlint + Oxfmt** - Linting and formatting
+- **Turborepo** - Monorepo build system
 
 ## Getting Started
 
-First, install the dependencies:
+Install dependencies:
 
 ```bash
-bun install
+pnpm install
 ```
 
-## Convex Setup
-
-This project uses Convex as a backend. You'll need to set up Convex before running the app:
+Set up Convex:
 
 ```bash
-bun run dev:setup
+pnpm run dev:setup
 ```
 
-Follow the prompts to create a new Convex project and connect it to your application.
+Follow the prompts to create a new Convex project. Then copy environment variables from `packages/backend/.env.local` to `apps/*/.env`.
 
-Copy environment variables from `packages/backend/.env.local` to `apps/*/.env`.
-
-Then, run the development server:
+Start the dev server:
 
 ```bash
-bun run dev
+pnpm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-Your app will connect to the Convex cloud backend automatically.
-
-## Deployment (Cloudflare via Alchemy)
-
-- Dev: cd apps/web && bun run alchemy dev
-- Deploy: cd apps/web && bun run deploy
-- Destroy: cd apps/web && bun run destroy
-
-For more details, see the guide on [Deploying to Cloudflare with Alchemy](https://www.better-t-stack.dev/docs/guides/cloudflare-alchemy).
+Open [http://localhost:3001](http://localhost:3001) to see the app.
 
 ## Git Hooks and Formatting
 
-- Format and lint fix: `bun run check`
+```bash
+pnpm run check        # lint and format fix
+pnpm run lint:check   # lint and format check
+```
 
 ## Project Structure
 
 ```
 budget/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Router)
+│   └── web/           # React + TanStack Router frontend
 ├── packages/
-│   ├── backend/     # Convex backend functions and schema
+│   ├── backend/       # Convex functions and schema
+│   ├── config/        # Shared configuration
+│   └── env/           # Environment variable handling
 ```
 
 ## Available Scripts
 
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:setup`: Setup and configure your Convex project
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run check`: Run Oxlint and Oxfmt
+- `pnpm run dev` - Start all apps in development mode
+- `pnpm run build` - Build all apps
+- `pnpm run dev:web` - Start only the web app
+- `pnpm run dev:server` - Start only the backend
+- `pnpm run dev:setup` - Set up and configure Convex
+- `pnpm run deploy:backend` - Deploy Convex backend
+- `pnpm run check-types` - Check TypeScript types
+- `pnpm run check` - Run Oxlint and Oxfmt

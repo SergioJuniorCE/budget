@@ -210,6 +210,8 @@ export function AddBudgetEntryDialog({
   defaultQuincena = "1ra",
   onAdd,
 }: AddBudgetEntryDialogProps) {
+  const [lastSelectedQuincena, setLastSelectedQuincena] = useState<Quincena | null>(null);
+
   const [form, dispatch] = useReducer(budgetFormReducer, {
     open: false,
     name: "",
@@ -222,13 +224,21 @@ export function AddBudgetEntryDialog({
   const amountRef = useRef<HTMLInputElement>(null);
 
   function reset() {
-    dispatch({ type: "reset", category: defaultCategory, quincena: defaultQuincena });
+    dispatch({
+      type: "reset",
+      category: defaultCategory,
+      quincena: lastSelectedQuincena ?? defaultQuincena,
+    });
     setTimeout(() => nameRef.current?.focus(), 0);
   }
 
   function handleOpenChange(newOpen: boolean) {
     if (newOpen) {
-      dispatch({ type: "open", category: defaultCategory, quincena: defaultQuincena });
+      dispatch({
+        type: "open",
+        category: defaultCategory,
+        quincena: lastSelectedQuincena ?? defaultQuincena,
+      });
       setTimeout(() => nameRef.current?.focus(), 0);
     } else {
       dispatch({ type: "close" });
@@ -316,7 +326,11 @@ export function AddBudgetEntryDialog({
               <Label>Quincena</Label>
               <Select
                 value={form.quincena}
-                onValueChange={(v) => dispatch({ type: "setQuincena", value: v as Quincena })}
+                onValueChange={(v) => {
+                  const quincena = v as Quincena;
+                  setLastSelectedQuincena(quincena);
+                  dispatch({ type: "setQuincena", value: quincena });
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />

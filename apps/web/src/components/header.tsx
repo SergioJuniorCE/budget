@@ -1,10 +1,9 @@
+import { Show, UserButton } from "@clerk/react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Authenticated } from "convex/react";
 
 import { ExportImportButton } from "./ExportImportButton";
 import { HeaderShareButton } from "./HeaderShareButton";
 import { ModeToggle } from "./mode-toggle";
-import UserMenu from "./user-menu";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -21,14 +20,14 @@ export default function Header() {
       <div className="flex items-center justify-between px-4 h-12">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center justify-center h-6 w-6 rounded bg-primary text-primary-foreground font-bold text-xs select-none">
+          <div className="flex items-center justify-center h-6 w-6 rounded-md bg-primary text-primary-foreground font-bold text-xs select-none">
             bt
           </div>
           <span className="font-semibold text-sm tracking-tight hidden sm:block">Better Track</span>
         </Link>
 
         {/* Nav links */}
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-0.5">
           {NAV_LINKS.map(({ to, label }) => {
             const isActive = pathname === to;
             return (
@@ -36,16 +35,13 @@ export default function Header() {
                 key={to}
                 to={to}
                 className={cn(
-                  "text-xs px-3 py-1.5 rounded-none transition-colors",
+                  "relative text-xs px-3 py-1.5 rounded-md transition-colors",
                   isActive
-                    ? "text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground",
+                    ? "text-foreground font-medium bg-muted"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                 )}
               >
                 {label}
-                {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-px bg-foreground" />
-                )}
               </Link>
             );
           })}
@@ -56,9 +52,9 @@ export default function Header() {
           <HeaderShareButton />
           <ExportImportButton />
           <ModeToggle />
-          <Authenticated>
-            <UserMenu />
-          </Authenticated>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </div>
       </div>
     </header>

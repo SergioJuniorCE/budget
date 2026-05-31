@@ -14,15 +14,15 @@ interface BudgetSnapshotProps {
 }
 
 const CATEGORY_BAR: Record<Category, string> = {
-  needs: "#3b82f6",
-  wants: "#f59e0b",
-  savings: "#10b981",
+  needs: "var(--color-needs)",
+  wants: "var(--color-wants)",
+  savings: "var(--color-savings)",
 };
 
 const CATEGORY_TEXT: Record<Category, string> = {
-  needs: "#2563eb",
-  wants: "#d97706",
-  savings: "#059669",
+  needs: "var(--color-needs)",
+  wants: "var(--color-wants)",
+  savings: "var(--color-savings)",
 };
 
 export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
@@ -38,12 +38,13 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
         ref={ref}
         style={{
           width: 420,
-          backgroundColor: "#ffffff",
-          borderRadius: 16,
+          backgroundColor: "var(--card)",
+          borderRadius: 12,
           padding: "28px 32px",
           fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-          color: "#111827",
+          color: "var(--card-foreground)",
           boxSizing: "border-box",
+          border: "1px solid var(--border)",
         }}
       >
         {/* Header */}
@@ -63,7 +64,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
                 fontWeight: 600,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
-                color: "#6b7280",
+                color: "var(--muted-foreground)",
               }}
             >
               Budget Summary
@@ -71,13 +72,15 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
             <p style={{ margin: "4px 0 0", fontSize: 22, fontWeight: 700 }}>
               {formatCurrency(totalIncome)}
             </p>
-            <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9ca3af" }}>total income</p>
+            <p style={{ margin: "2px 0 0", fontSize: 12, color: "var(--muted-foreground)" }}>
+              total income
+            </p>
           </div>
           <p
             style={{
               margin: 0,
               fontSize: 13,
-              color: "#6b7280",
+              color: "var(--muted-foreground)",
               fontWeight: 500,
               textAlign: "right",
               paddingTop: 4,
@@ -88,7 +91,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, backgroundColor: "#f3f4f6", marginBottom: 20 }} />
+        <div style={{ height: 1, backgroundColor: "var(--border)", marginBottom: 20 }} />
 
         {/* 50/30/20 rows */}
         <p
@@ -98,7 +101,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
             fontWeight: 600,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: "#9ca3af",
+            color: "var(--muted-foreground)",
           }}
         >
           50/30/20 Breakdown
@@ -124,26 +127,28 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
                   }}
                 >
                   {CATEGORY_LABELS[cat]}{" "}
-                  <span style={{ fontWeight: 400, color: "#9ca3af" }}>
+                  <span style={{ fontWeight: 400, color: "var(--muted-foreground)" }}>
                     ({Math.round(CATEGORY_RATIOS[cat] * 100)}%)
                   </span>
                 </span>
-                <span style={{ fontSize: 12, color: "#374151" }}>
+                <span style={{ fontSize: 12, color: "var(--foreground)" }}>
                   <span
                     style={{
                       fontWeight: 700,
-                      color: over ? "#ef4444" : "#111827",
+                      color: over ? "var(--destructive)" : "var(--foreground)",
                     }}
                   >
                     {formatCurrency(current)}
                   </span>{" "}
-                  <span style={{ color: "#9ca3af" }}>/ {formatCurrency(budget)}</span>
+                  <span style={{ color: "var(--muted-foreground)" }}>
+                    / {formatCurrency(budget)}
+                  </span>
                 </span>
               </div>
               <div
                 style={{
                   height: 6,
-                  backgroundColor: "#f3f4f6",
+                  backgroundColor: "var(--muted)",
                   borderRadius: 99,
                   overflow: "hidden",
                 }}
@@ -152,7 +157,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
                   style={{
                     height: "100%",
                     width: `${pct}%`,
-                    backgroundColor: over ? "#ef4444" : CATEGORY_BAR[cat],
+                    backgroundColor: over ? "var(--destructive)" : CATEGORY_BAR[cat],
                     borderRadius: 99,
                   }}
                 />
@@ -162,7 +167,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
         })}
 
         {/* Divider */}
-        <div style={{ height: 1, backgroundColor: "#f3f4f6", margin: "20px 0" }} />
+        <div style={{ height: 1, backgroundColor: "var(--border)", margin: "20px 0" }} />
 
         {/* Quincena breakdown */}
         <p
@@ -172,7 +177,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
             fontWeight: 600,
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            color: "#9ca3af",
+            color: "var(--muted-foreground)",
           }}
         >
           By Quincena
@@ -184,43 +189,37 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
                 label: "1ra Quincena",
                 expenses: q1Expenses,
                 remaining: totalIncome / 2 - q1Expenses,
-                accent: "#6366f1",
-                accentLight: "#eef2ff",
               },
               {
                 label: "2da Quincena",
                 expenses: q2Expenses,
                 remaining: totalIncome / 2 - q2Expenses,
-                accent: "#8b5cf6",
-                accentLight: "#f5f3ff",
               },
             ] as const
-          ).map(({ label, expenses, remaining, accent, accentLight }) => {
+          ).map(({ label, expenses, remaining }) => {
             const isNegative = remaining < 0;
             return (
               <div
                 key={label}
                 style={{
                   flex: 1,
-                  borderRadius: 12,
+                  borderRadius: 10,
                   overflow: "hidden",
-                  border: "1px solid #f3f4f6",
+                  border: "1px solid var(--border)",
+                  backgroundColor: "var(--card)",
                 }}
               >
-                {/* Colored top accent bar */}
-                <div style={{ height: 4, backgroundColor: accent }} />
                 <div style={{ padding: "12px 14px" }}>
                   <p
                     style={{
                       margin: "0 0 10px",
                       fontSize: 12,
                       fontWeight: 700,
-                      color: accent,
+                      color: "var(--foreground)",
                     }}
                   >
                     {label}
                   </p>
-                  {/* Expenses row */}
                   <div
                     style={{
                       display: "flex",
@@ -229,17 +228,21 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
                       marginBottom: 6,
                     }}
                   >
-                    <span style={{ fontSize: 10, color: "#9ca3af", fontWeight: 500 }}>Gastos</span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#374151" }}>
+                    <span
+                      style={{ fontSize: 10, color: "var(--muted-foreground)", fontWeight: 500 }}
+                    >
+                      Gastos
+                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "var(--foreground)" }}>
                       {formatCurrency(expenses)}
                     </span>
                   </div>
-                  {/* Divider */}
-                  <div style={{ height: 1, backgroundColor: "#f3f4f6", marginBottom: 8 }} />
-                  {/* Remaining pill */}
+                  <div style={{ height: 1, backgroundColor: "var(--border)", marginBottom: 8 }} />
                   <div
                     style={{
-                      backgroundColor: isNegative ? "#fef2f2" : accentLight,
+                      backgroundColor: isNegative
+                        ? "color-mix(in oklch, var(--destructive) 10%, transparent)"
+                        : "var(--muted)",
                       borderRadius: 8,
                       padding: "6px 10px",
                       display: "flex",
@@ -251,7 +254,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
                       style={{
                         fontSize: 10,
                         fontWeight: 600,
-                        color: isNegative ? "#ef4444" : accent,
+                        color: isNegative ? "var(--destructive)" : "var(--muted-foreground)",
                       }}
                     >
                       Restante
@@ -260,7 +263,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
                       style={{
                         fontSize: 13,
                         fontWeight: 800,
-                        color: isNegative ? "#ef4444" : accent,
+                        color: isNegative ? "var(--destructive)" : "var(--foreground)",
                       }}
                     >
                       {formatCurrency(remaining)}
@@ -278,7 +281,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            backgroundColor: "#f9fafb",
+            backgroundColor: "var(--muted)",
             borderRadius: 10,
             padding: "10px 14px",
             marginTop: 10,
@@ -289,7 +292,7 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
             style={{
               fontSize: 16,
               fontWeight: 800,
-              color: totalRestante < 0 ? "#ef4444" : "#059669",
+              color: totalRestante < 0 ? "var(--destructive)" : "var(--color-savings)",
             }}
           >
             {formatCurrency(totalRestante)}
@@ -301,9 +304,10 @@ export const BudgetSnapshot = forwardRef<HTMLDivElement, BudgetSnapshotProps>(
           style={{
             margin: "18px 0 0",
             fontSize: 10,
-            color: "#d1d5db",
+            color: "var(--muted-foreground)",
             textAlign: "center",
             letterSpacing: "0.04em",
+            opacity: 0.5,
           }}
         >
           50/30/20 Budget Tracker
