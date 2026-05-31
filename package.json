@@ -12,7 +12,11 @@
     "dev:setup": "turbo -F @budget/backend dev:setup",
     "deploy:backend": "turbo -F @budget/backend deploy",
     "check": "oxlint && oxfmt --write",
-    "lint:check": "oxlint && oxfmt --check"
+    "lint:check": "oxlint && oxfmt --check",
+    "test": "turbo test",
+    "test:web": "turbo -F @budget/web test",
+    "test:backend": "turbo -F @budget/backend test",
+    "test:coverage": "turbo test:coverage"
   },
   "dependencies": {
     "@budget/env": "workspace:*",

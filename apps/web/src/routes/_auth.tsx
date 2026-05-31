@@ -3,17 +3,18 @@ import { useAuth } from "@clerk/react";
 
 export const Route = createFileRoute("/_auth")({
   component: AuthLayout,
-  beforeLoad: ({ context }) => {
-    // If user is already signed in, redirect to dashboard
-    // Note: This is a client-side check, the actual auth state is checked in the component
-  },
 });
 
 function AuthLayout() {
   const { isSignedIn, isLoaded } = useAuth();
 
+  // Show nothing while auth state loads to prevent flash
+  if (!isLoaded) {
+    return null;
+  }
+
   // Redirect to dashboard if already signed in
-  if (isLoaded && isSignedIn) {
+  if (isSignedIn) {
     throw redirect({ to: "/dashboard" });
   }
 

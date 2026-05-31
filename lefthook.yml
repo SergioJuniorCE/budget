@@ -7,3 +7,6 @@ pre-commit:
     check:
       run: pnpm check {staged_files}
       stage_fixed: true
+    test:
+      run: pnpm test
+      glob: "*.{ts,tsx}"

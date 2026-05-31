@@ -16,7 +16,7 @@ function SignInPage() {
       {showSignUp ? (
         <>
           <h1 className="text-2xl font-bold tracking-tight text-center mb-6">Create account</h1>
-          <SignUp signInUrl="/sign-in" redirectUrl={redirectUrl} />
+          <SignUp signInUrl="/sign-in" fallbackRedirectUrl={redirectUrl} />
           <div className="mt-6 text-center">
             <button
               onClick={() => setShowSignUp(false)}
@@ -29,7 +29,7 @@ function SignInPage() {
       ) : (
         <>
           <h1 className="text-2xl font-bold tracking-tight text-center mb-6">Welcome back</h1>
-          <SignIn signUpUrl="/sign-in" redirectUrl={redirectUrl} />
+          <SignIn signUpUrl="/sign-in" fallbackRedirectUrl={redirectUrl} />
           <div className="mt-6 text-center">
             <button
               onClick={() => setShowSignUp(true)}

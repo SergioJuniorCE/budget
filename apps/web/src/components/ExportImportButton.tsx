@@ -18,6 +18,7 @@ export function ExportImportButton() {
   if (!isDashboard || !data) return null;
 
   function handleExport() {
+    if (!data) return;
     const exportData = {
       version: 1,
       exportedAt: new Date().toISOString(),

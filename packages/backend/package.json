@@ -7,7 +7,9 @@
   "scripts": {
     "dev": "convex dev",
     "dev:setup": "convex dev --configure --until-success",
-    "deploy": "convex deploy"
+    "deploy": "convex deploy",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "convex": "catalog:",
@@ -17,6 +19,7 @@
   "devDependencies": {
     "@budget/config": "workspace:*",
     "@types/node": "^24.3.0",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "^3.2.3"
   }
 }
