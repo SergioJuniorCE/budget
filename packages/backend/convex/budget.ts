@@ -210,9 +210,11 @@ export const reorderBudgetEntries = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     for (let i = 0; i < args.ids.length; i++) {
-      const entry = await ctx.db.get("budgetEntries", args.ids[i]);
+      const id = args.ids[i];
+      if (!id) continue;
+      const entry = await ctx.db.get("budgetEntries", id);
       if (entry && entry.userId === user.userId) {
-        await ctx.db.patch("budgetEntries", args.ids[i], { order: i });
+        await ctx.db.patch("budgetEntries", id, { order: i });
       }
     }
     return null;
@@ -225,9 +227,11 @@ export const reorderIncomeEntries = mutation({
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     for (let i = 0; i < args.ids.length; i++) {
-      const entry = await ctx.db.get("incomeEntries", args.ids[i]);
+      const id = args.ids[i];
+      if (!id) continue;
+      const entry = await ctx.db.get("incomeEntries", id);
       if (entry && entry.userId === user.userId) {
-        await ctx.db.patch("incomeEntries", args.ids[i], { order: i });
+        await ctx.db.patch("incomeEntries", id, { order: i });
       }
     }
     return null;
