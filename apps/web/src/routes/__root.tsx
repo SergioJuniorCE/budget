@@ -1,13 +1,14 @@
-import { env } from "@budget/env/web";
-import { ConvexBetterAuthProvider } from "@convex-dev/better-auth/react";
+import { useAuth } from "@clerk/react";
 import { HeadContent, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
 
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { authClient } from "@/lib/auth-client";
+
+import { env } from "@budget/env/web";
 
 import "../index.css";
 
@@ -38,7 +39,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 
 function RootComponent() {
   return (
-    <ConvexBetterAuthProvider client={convex} authClient={authClient}>
+    <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
       <HeadContent />
       <ThemeProvider
         attribute="class"
@@ -55,6 +56,6 @@ function RootComponent() {
         <Toaster richColors />
       </ThemeProvider>
       <TanStackRouterDevtools position="bottom-left" />
-    </ConvexBetterAuthProvider>
+    </ConvexProviderWithClerk>
   );
 }

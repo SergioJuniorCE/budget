@@ -1,10 +1,9 @@
+import { Show, UserButton } from "@clerk/react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Authenticated } from "convex/react";
 
 import { ExportImportButton } from "./ExportImportButton";
 import { HeaderShareButton } from "./HeaderShareButton";
 import { ModeToggle } from "./mode-toggle";
-import UserMenu from "./user-menu";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -56,9 +55,9 @@ export default function Header() {
           <HeaderShareButton />
           <ExportImportButton />
           <ModeToggle />
-          <Authenticated>
-            <UserMenu />
-          </Authenticated>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </div>
       </div>
     </header>

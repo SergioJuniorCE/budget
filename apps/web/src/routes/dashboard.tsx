@@ -1,7 +1,8 @@
+import { Show } from "@clerk/react";
 import { api } from "@budget/backend/convex/_generated/api";
 import type { Id } from "@budget/backend/convex/_generated/dataModel";
 import { createFileRoute } from "@tanstack/react-router";
-import { Authenticated, AuthLoading, Unauthenticated, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { useCallback, useState } from "react";
 
 import SignInForm from "@/components/sign-in-form";
@@ -23,12 +24,12 @@ function RouteComponent() {
 
   return (
     <>
-      <Authenticated>
+      <Show when="signed-in">
         <DashboardDataProvider>
           <BudgetDashboard />
         </DashboardDataProvider>
-      </Authenticated>
-      <Unauthenticated>
+      </Show>
+      <Show when="signed-out" fallback={null}>
         <div className="flex items-center justify-center min-h-[60vh]">
           {showSignIn ? (
             <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} />
@@ -36,18 +37,7 @@ function RouteComponent() {
             <SignUpForm onSwitchToSignIn={() => setShowSignIn(true)} />
           )}
         </div>
-      </Unauthenticated>
-      <AuthLoading>
-        <div className="p-6 space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-40 w-full" />
-          <div className="grid grid-cols-3 gap-4">
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
-            <Skeleton className="h-64" />
-          </div>
-        </div>
-      </AuthLoading>
+      </Show>
     </>
   );
 }

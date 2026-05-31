@@ -1,6 +1,8 @@
+import { ClerkProvider } from "@clerk/react";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
 
+import { env } from "@budget/env/web";
 import Loader from "./components/loader";
 import { routeTree } from "./routeTree.gen";
 
@@ -25,5 +27,9 @@ if (!rootElement) {
 
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(<RouterProvider router={router} />);
+  root.render(
+    <ClerkProvider afterSignOutUrl="/" publishableKey={env.VITE_CLERK_PUBLISHABLE_KEY}>
+      <RouterProvider router={router} />
+    </ClerkProvider>,
+  );
 }
