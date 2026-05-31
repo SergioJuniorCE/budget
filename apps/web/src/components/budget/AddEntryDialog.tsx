@@ -217,20 +217,28 @@ export function AddBudgetEntryDialog({
     name: "",
     amount: "",
     category: defaultCategory,
-    quincena: lastSelectedQuincena ?? defaultQuincena,
+    quincena: defaultQuincena,
     note: "",
   });
   const nameRef = useRef<HTMLInputElement>(null);
   const amountRef = useRef<HTMLInputElement>(null);
 
   function reset() {
-    dispatch({ type: "reset", category: defaultCategory, quincena: defaultQuincena });
+    dispatch({
+      type: "reset",
+      category: defaultCategory,
+      quincena: lastSelectedQuincena ?? defaultQuincena,
+    });
     setTimeout(() => nameRef.current?.focus(), 0);
   }
 
   function handleOpenChange(newOpen: boolean) {
     if (newOpen) {
-      dispatch({ type: "open", category: defaultCategory, quincena: defaultQuincena });
+      dispatch({
+        type: "open",
+        category: defaultCategory,
+        quincena: lastSelectedQuincena ?? defaultQuincena,
+      });
       setTimeout(() => nameRef.current?.focus(), 0);
     } else {
       dispatch({ type: "close" });
@@ -318,7 +326,11 @@ export function AddBudgetEntryDialog({
               <Label>Quincena</Label>
               <Select
                 value={form.quincena}
-                onValueChange={(v) => dispatch({ type: "setQuincena", value: v as Quincena })}
+                onValueChange={(v) => {
+                  const quincena = v as Quincena;
+                  setLastSelectedQuincena(quincena);
+                  dispatch({ type: "setQuincena", value: quincena });
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
