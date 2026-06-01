@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { Navigate, Outlet, createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@clerk/react";
 
 export const Route = createFileRoute("/_auth")({
@@ -15,7 +15,7 @@ function AuthLayout() {
 
   // Redirect to dashboard if already signed in
   if (isSignedIn) {
-    throw redirect({ to: "/dashboard" });
+    return <Navigate to="/dashboard" />;
   }
 
   return (

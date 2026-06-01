@@ -62,12 +62,8 @@ describe("Button", () => {
     expect(handleClick).not.toHaveBeenCalled();
   });
 
-  it("renders as child element when asChild is true", () => {
-    render(
-      <Button asChild>
-        <a href="/test">Link Button</a>
-      </Button>,
-    );
+  it("renders as child element when using render prop", () => {
+    render(<Button render={<a href="/test">Link Button</a>} />);
     expect(screen.getByRole("link", { name: "Link Button" })).toBeInTheDocument();
   });
 });

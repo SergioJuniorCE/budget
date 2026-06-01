@@ -1,4 +1,4 @@
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { Navigate, Outlet, createFileRoute } from "@tanstack/react-router";
 import { useAuth } from "@clerk/react";
 
 import Header from "@/components/header";
@@ -12,7 +12,7 @@ function DashboardLayout() {
 
   // Redirect to sign-in if not authenticated
   if (isLoaded && !isSignedIn) {
-    throw redirect({ to: "/sign-in", search: { redirect: "/dashboard" } });
+    return <Navigate to="/sign-in" search={{ redirect: "/dashboard" }} />;
   }
 
   return (
