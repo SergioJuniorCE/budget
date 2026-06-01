@@ -4,4 +4,10 @@
     "directory": "./dist",
     "not_found_handling": "single-page-application",
   },
+  "routes": [
+    {
+      "pattern": "budget.yoggan.dev",
+      "custom_domain": true,
+    },
+  ],
 }
