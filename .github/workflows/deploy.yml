@@ -3,13 +3,9 @@ name: Deploy
 on:
   push:
     branches: [master]
-  pull_request:
-    branches: [master]
-    types: [closed]
 
 jobs:
   deploy:
-    if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,6 +31,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm ci
+
+      - name: Run tests
+        run: pnpm run test
 
       - name: Deploy backend (Convex)
         run: pnpm backend:deploy
