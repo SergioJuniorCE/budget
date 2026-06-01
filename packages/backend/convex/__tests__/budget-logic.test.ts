@@ -170,7 +170,13 @@ describe("Import/Export Data Structure", () => {
   });
 
   it("allows optional note in import", () => {
-    const minimalImport = {
+    const minimalImport: {
+      name: string;
+      amount: number;
+      category: string;
+      quincena: string;
+      note?: string;
+    } = {
       name: "Groceries",
       amount: 3000,
       category: "needs",
@@ -180,7 +186,13 @@ describe("Import/Export Data Structure", () => {
   });
 
   it("allows optional paid status in import", () => {
-    const minimalImport = {
+    const minimalImport: {
+      name: string;
+      amount: number;
+      category: string;
+      quincena: string;
+      paid?: boolean;
+    } = {
       name: "Groceries",
       amount: 3000,
       category: "needs",
