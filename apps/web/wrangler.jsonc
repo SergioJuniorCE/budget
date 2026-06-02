@@ -1,10 +1,4 @@
 {
   "name": "budget",
   "pages_build_output_dir": "./dist",
-  "routes": [
-    {
-      "pattern": "budget.yoggan.dev",
-      "custom_domain": true,
-    },
-  ],
 }
