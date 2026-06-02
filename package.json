@@ -11,7 +11,7 @@
     "lint:check": "oxlint && oxfmt --check",
     "test": "turbo test",
     "test:coverage": "turbo test:coverage",
-    "backend:deploy": "npx convex deploy --dir packages/backend/convex",
+    "backend:deploy": "pnpm --filter @budget/backend run deploy",
     "web:build": "pnpm --filter web build"
   },
   "dependencies": {
