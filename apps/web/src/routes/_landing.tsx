@@ -1,3 +1,4 @@
+import { UserButton, useAuth } from "@clerk/react";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 
 import { ModeToggle } from "@/components/mode-toggle";
@@ -20,6 +21,8 @@ function Wordmark({ compact = false }: { compact?: boolean }) {
 }
 
 function LandingLayout() {
+  const { isLoaded, isSignedIn } = useAuth();
+
   return (
     <div className="min-h-[100dvh] bg-background text-foreground">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/88 backdrop-blur-xl">
@@ -33,18 +36,30 @@ function LandingLayout() {
           </Link>
           <nav className="flex items-center gap-2" aria-label="Primary navigation">
             <ModeToggle />
-            <Link
-              to="/sign-in"
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "lg" }),
-                "hidden sm:inline-flex",
-              )}
-            >
-              Sign in
-            </Link>
-            <Link to="/dashboard" className={buttonVariants({ size: "lg" })}>
-              Start budgeting
-            </Link>
+            {isLoaded &&
+              (isSignedIn ? (
+                <>
+                  <Link to="/dashboard" className={buttonVariants({ size: "lg" })}>
+                    Dashboard
+                  </Link>
+                  <UserButton />
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/sign-in"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "lg" }),
+                      "hidden sm:inline-flex",
+                    )}
+                  >
+                    Sign in
+                  </Link>
+                  <Link to="/dashboard" className={buttonVariants({ size: "lg" })}>
+                    Start budgeting
+                  </Link>
+                </>
+              ))}
           </nav>
         </div>
       </header>
@@ -66,18 +81,30 @@ function LandingLayout() {
             A clear monthly budget built around both quincenas and the 50/30/20 rule.
           </p>
           <div className="flex items-center gap-4 text-sm">
-            <Link
-              to="/sign-in"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/dashboard"
-              className="font-medium text-primary transition-opacity hover:opacity-75"
-            >
-              Start budgeting
-            </Link>
+            {isLoaded &&
+              (isSignedIn ? (
+                <Link
+                  to="/dashboard"
+                  className="font-medium text-primary transition-opacity hover:opacity-75"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/sign-in"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/dashboard"
+                    className="font-medium text-primary transition-opacity hover:opacity-75"
+                  >
+                    Start budgeting
+                  </Link>
+                </>
+              ))}
           </div>
         </div>
       </footer>

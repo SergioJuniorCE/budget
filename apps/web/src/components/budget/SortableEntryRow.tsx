@@ -38,12 +38,12 @@ export function SortableEntryRow({
 
   const dragHandle = (
     <button
-      className="flex size-6 shrink-0 touch-none items-center justify-center opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 cursor-grab active:cursor-grabbing"
+      className="flex size-full min-h-9 touch-none cursor-grab items-center justify-center text-muted-foreground/65 transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing"
       aria-label="Drag to reorder"
       {...attributes}
       {...listeners}
     >
-      <GripVerticalIcon className="h-3 w-3 text-muted-foreground" />
+      <GripVerticalIcon className="size-3" />
     </button>
   );
 

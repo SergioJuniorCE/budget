@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/react";
 import { ArrowRight, Check, CircleDollarSign, ListChecks } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
@@ -21,6 +22,8 @@ const PAYDAY_POINTS = [
 ] as const;
 
 function HomeComponent() {
+  const { isLoaded, isSignedIn } = useAuth();
+
   return (
     <div className="overflow-hidden">
       <section className="mx-auto grid min-h-[calc(100dvh-4rem)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 md:grid-cols-[0.9fr_1.1fr] md:py-16 lg:gap-20 lg:px-8">
@@ -35,22 +38,35 @@ function HomeComponent() {
             Plan each quincena, keep the 50/30/20 rule visible, and know what is truly left.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              to="/dashboard"
-              className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-sm")}
-            >
-              Start budgeting
-              <ArrowRight aria-hidden="true" />
-            </Link>
-            <Link
-              to="/sign-in"
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "h-11 px-5 text-sm",
-              )}
-            >
-              Sign in
-            </Link>
+            {isLoaded &&
+              (isSignedIn ? (
+                <Link
+                  to="/dashboard"
+                  className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-sm")}
+                >
+                  Open dashboard
+                  <ArrowRight aria-hidden="true" />
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-sm")}
+                  >
+                    Start budgeting
+                    <ArrowRight aria-hidden="true" />
+                  </Link>
+                  <Link
+                    to="/sign-in"
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "lg" }),
+                      "h-11 px-5 text-sm",
+                    )}
+                  >
+                    Sign in
+                  </Link>
+                </>
+              ))}
           </div>
         </div>
 
@@ -163,16 +179,18 @@ function HomeComponent() {
               Build a plan you can update in minutes, then return to whenever money moves.
             </p>
           </div>
-          <Link
-            to="/dashboard"
-            className={cn(
-              buttonVariants({ variant: "secondary", size: "lg" }),
-              "h-11 w-fit bg-background px-5 text-sm text-foreground hover:bg-background/90",
-            )}
-          >
-            Start budgeting
-            <ArrowRight aria-hidden="true" />
-          </Link>
+          {isLoaded && (
+            <Link
+              to="/dashboard"
+              className={cn(
+                buttonVariants({ variant: "secondary", size: "lg" }),
+                "h-11 w-fit bg-background px-5 text-sm text-foreground hover:bg-background/90",
+              )}
+            >
+              {isSignedIn ? "Open dashboard" : "Start budgeting"}
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          )}
         </div>
       </section>
     </div>

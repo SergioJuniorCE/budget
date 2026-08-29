@@ -1,6 +1,5 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   CATEGORY_LABELS,
@@ -11,7 +10,7 @@ import {
   type UserData,
 } from "./types";
 
-const CATEGORY_COLORS: Record<Category, string> = {
+const CATEGORY_MARKS: Record<Category, string> = {
   needs: "bg-needs",
   wants: "bg-wants",
   savings: "bg-savings",
@@ -30,101 +29,147 @@ interface OverviewPanelProps {
 export function OverviewPanel({ data }: OverviewPanelProps) {
   const stats = computeBudgetStats(data);
   const { totalIncome, categories, q1Expenses, q2Expenses, totalRestante } = stats;
+  const totalPlanned = totalIncome - totalRestante;
   const isNegative = totalRestante < 0;
 
+  const summaryCells = [
+    { label: "Total income", value: totalIncome },
+    { label: "Planned", value: totalPlanned },
+    { label: "Remaining", value: totalRestante, negative: isNegative },
+    { label: "1ra quincena", value: q1Expenses },
+    { label: "2da quincena", value: q2Expenses },
+  ];
+
   return (
-    <Card className="h-full gap-0 bg-card">
-      <CardHeader className="flex-row items-center justify-between border-b border-border/70 pb-4">
-        <CardTitle>Monthly balance</CardTitle>
-        <span
-          className={cn(
-            "inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold",
-            isNegative ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary",
-          )}
-        >
-          {isNegative ? (
-            <ArrowDownRight className="size-3.5" aria-hidden="true" />
-          ) : (
-            <ArrowUpRight className="size-3.5" aria-hidden="true" />
-          )}
-          {isNegative ? "Over plan" : "Available"}
-        </span>
-      </CardHeader>
-      <CardContent className="grid flex-1 gap-6 pt-5 md:grid-cols-[0.82fr_1.18fr]">
-        <div className="flex min-w-0 flex-col">
-          <p className="text-xs font-medium text-muted-foreground">Left after planned expenses</p>
-          <p
+    <section
+      aria-labelledby="workbook-summary-title"
+      className="overflow-hidden rounded-lg border border-border bg-card"
+    >
+      <div className="flex min-h-10 items-center justify-between gap-3 border-b border-border bg-muted/45 px-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="font-mono text-[10px] font-semibold text-muted-foreground">fx</span>
+          <h2 id="workbook-summary-title" className="truncate text-xs font-semibold">
+            Monthly summary
+          </h2>
+        </div>
+        <span className="font-mono text-[10px] text-muted-foreground">MXN</span>
+      </div>
+
+      <div className="grid grid-cols-2 border-b border-border sm:grid-cols-3 xl:grid-cols-5">
+        {summaryCells.map((cell, index) => (
+          <div
+            key={cell.label}
             className={cn(
-              "mt-2 font-display text-4xl font-semibold tracking-[-0.045em] tabular-nums",
-              isNegative ? "text-destructive" : "text-foreground",
+              "min-w-0 border-border px-3 py-3",
+              index % 2 === 0 ? "border-r sm:border-r" : "sm:border-r",
+              index === summaryCells.length - 1 && "border-r-0",
+              index < 4 && "border-b xl:border-b-0",
+              index === 4 && "col-span-2 border-b-0 sm:col-span-1",
             )}
           >
-            {formatCurrency(totalRestante)}
-          </p>
-          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            From {formatCurrency(totalIncome)} in monthly income.
-          </p>
-
-          <div className="mt-auto grid grid-cols-2 gap-3 pt-6">
-            <div className="rounded-lg bg-muted/65 p-3">
-              <p className="text-[11px] text-muted-foreground">First quincena</p>
-              <p className="mt-1 text-sm font-semibold tabular-nums">
-                {formatCurrency(q1Expenses)}
-              </p>
-            </div>
-            <div className="rounded-lg bg-muted/65 p-3">
-              <p className="text-[11px] text-muted-foreground">Second quincena</p>
-              <p className="mt-1 text-sm font-semibold tabular-nums">
-                {formatCurrency(q2Expenses)}
-              </p>
-            </div>
+            <p className="truncate text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              {cell.label}
+            </p>
+            <p
+              className={cn(
+                "mt-1.5 truncate font-mono text-sm font-semibold tabular-nums sm:text-base",
+                cell.negative && "text-destructive",
+              )}
+            >
+              {formatCurrency(cell.value)}
+            </p>
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="space-y-5 border-t border-border/70 pt-5 md:border-t-0 md:border-l md:pt-0 md:pl-6">
-          {categories.map(({ cat, budget, current }) => {
-            const pct = budget > 0 ? Math.round((current / budget) * 100) : 0;
-            const barWidth = Math.min(100, pct);
-            const overBudget = current > budget;
-            return (
-              <div key={cat}>
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className={cn("text-xs font-semibold", CATEGORY_TEXT[cat])}>
-                      {CATEGORY_LABELS[cat]}
-                    </p>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">
-                      {Math.round(CATEGORY_RATIOS[cat] * 100)}% target
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[720px] border-collapse text-xs">
+          <thead>
+            <tr className="h-8 border-b border-border bg-muted/25 text-left text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              <th className="px-3 font-medium">Category</th>
+              <th className="w-20 px-3 text-right font-medium">Rule</th>
+              <th className="w-36 px-3 text-right font-medium">Target</th>
+              <th className="w-36 px-3 text-right font-medium">Planned</th>
+              <th className="w-36 px-3 text-right font-medium">Variance</th>
+              <th className="w-32 px-3 font-medium">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map(({ cat, budget, current }) => {
+              const variance = budget - current;
+              const overBudget = variance < 0;
+
+              return (
+                <tr key={cat} className="h-10 border-b border-border/70 last:border-b-0">
+                  <td className="px-3">
+                    <div className="flex items-center gap-2">
+                      <span className={cn("h-4 w-1 shrink-0", CATEGORY_MARKS[cat])} />
+                      <span className={cn("font-semibold", CATEGORY_TEXT[cat])}>
+                        {CATEGORY_LABELS[cat]}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-3 text-right font-mono text-muted-foreground tabular-nums">
+                    {Math.round(CATEGORY_RATIOS[cat] * 100)}%
+                  </td>
+                  <td className="px-3 text-right font-mono tabular-nums">
+                    {formatCurrency(budget)}
+                  </td>
+                  <td className="px-3 text-right font-mono tabular-nums">
+                    {formatCurrency(current)}
+                  </td>
+                  <td
+                    className={cn(
+                      "px-3 text-right font-mono tabular-nums",
+                      overBudget ? "text-destructive" : "text-primary",
+                    )}
+                  >
+                    {formatCurrency(variance)}
+                  </td>
+                  <td className="px-3">
+                    <span
                       className={cn(
-                        "text-xs font-semibold tabular-nums",
-                        overBudget && "text-destructive",
+                        "inline-flex items-center gap-1 text-[11px] font-medium",
+                        overBudget ? "text-destructive" : "text-primary",
                       )}
                     >
-                      {formatCurrency(current)}
-                    </p>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground tabular-nums">
-                      of {formatCurrency(budget)}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={cn(
-                      "h-full rounded-full transition-[width] duration-500",
-                      overBudget ? "bg-destructive" : CATEGORY_COLORS[cat],
-                    )}
-                    style={{ width: `${barWidth}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+                      {overBudget ? (
+                        <ArrowDownRight className="size-3.5" aria-hidden="true" />
+                      ) : (
+                        <ArrowUpRight className="size-3.5" aria-hidden="true" />
+                      )}
+                      {overBudget ? "Over target" : "Within target"}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          <tfoot>
+            <tr className="h-10 border-t border-border bg-muted/35 font-semibold">
+              <td className="px-3">Total</td>
+              <td className="px-3 text-right font-mono text-muted-foreground">100%</td>
+              <td className="px-3 text-right font-mono tabular-nums">
+                {formatCurrency(totalIncome)}
+              </td>
+              <td className="px-3 text-right font-mono tabular-nums">
+                {formatCurrency(totalPlanned)}
+              </td>
+              <td
+                className={cn(
+                  "px-3 text-right font-mono tabular-nums",
+                  isNegative ? "text-destructive" : "text-primary",
+                )}
+              >
+                {formatCurrency(totalRestante)}
+              </td>
+              <td className="px-3 text-[11px] text-muted-foreground">
+                {isNegative ? "Review plan" : "Available"}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
   );
 }
