@@ -1,66 +1,110 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { UserButton, useAuth } from "@clerk/react";
+import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 
-import { Link } from "@tanstack/react-router";
+import { ModeToggle } from "@/components/mode-toggle";
+import { buttonVariants } from "@/components/ui/button-variants";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_landing")({
   component: LandingLayout,
 });
 
-function LandingLayout() {
+function Wordmark({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="min-h-svh flex flex-col">
-      {/* Marketing Header */}
-      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="flex items-center justify-between px-4 h-14">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex items-center justify-center h-7 w-7 rounded-md bg-primary text-primary-foreground font-bold text-sm">
-              bt
-            </div>
-            <span className="font-semibold tracking-tight">Better Track</span>
+    <span className="inline-flex items-center gap-2.5">
+      <span className="grid size-8 place-items-center rounded-lg bg-primary text-[11px] font-black tracking-[-0.08em] text-primary-foreground shadow-sm">
+        bt
+      </span>
+      {!compact && <span className="font-semibold tracking-[-0.02em]">Better Track</span>}
+    </span>
+  );
+}
+
+function LandingLayout() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  return (
+    <div className="min-h-[100dvh] bg-background text-foreground">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/88 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link
+            to="/"
+            aria-label="Better Track home"
+            className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Wordmark />
           </Link>
-          <nav className="flex items-center gap-4">
-            <Link
-              to="/sign-in"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              to="/dashboard"
-              className="text-sm font-medium bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Get started
-            </Link>
+          <nav className="flex items-center gap-2" aria-label="Primary navigation">
+            <ModeToggle />
+            {isLoaded &&
+              (isSignedIn ? (
+                <>
+                  <Link to="/dashboard" className={buttonVariants({ size: "lg" })}>
+                    Dashboard
+                  </Link>
+                  <UserButton />
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/sign-in"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "lg" }),
+                      "hidden sm:inline-flex",
+                    )}
+                  >
+                    Sign in
+                  </Link>
+                  <Link to="/dashboard" className={buttonVariants({ size: "lg" })}>
+                    Start budgeting
+                  </Link>
+                </>
+              ))}
           </nav>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1">
+      <main>
         <Outlet />
       </main>
 
-      {/* Marketing Footer */}
-      <footer className="border-t py-8 px-4">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center h-6 w-6 rounded-md bg-muted text-muted-foreground font-bold text-xs">
-              bt
-            </div>
-            <span className="text-sm text-muted-foreground">
-              Better Track — Personal budget tracking
-            </span>
-          </div>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-foreground transition-colors">
-              Home
-            </Link>
-            <Link to="/dashboard" className="hover:text-foreground transition-colors">
-              Dashboard
-            </Link>
-            <Link to="/sign-in" className="hover:text-foreground transition-colors">
-              Sign in
-            </Link>
+      <footer className="border-t border-border/70 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <Link
+            to="/"
+            aria-label="Better Track home"
+            className="w-fit rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Wordmark />
+          </Link>
+          <p className="max-w-md text-sm text-muted-foreground">
+            A clear monthly budget built around both quincenas and the 50/30/20 rule.
+          </p>
+          <div className="flex items-center gap-4 text-sm">
+            {isLoaded &&
+              (isSignedIn ? (
+                <Link
+                  to="/dashboard"
+                  className="font-medium text-primary transition-opacity hover:opacity-75"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    to="/sign-in"
+                    className="text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/dashboard"
+                    className="font-medium text-primary transition-opacity hover:opacity-75"
+                  >
+                    Start budgeting
+                  </Link>
+                </>
+              ))}
           </div>
         </div>
       </footer>

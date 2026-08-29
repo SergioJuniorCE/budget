@@ -86,7 +86,7 @@ export function AddIncomeDialog({ onAdd }: AddIncomeDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="min-h-9 sm:min-h-7">
             <PlusIcon />
             Add Income
           </Button>
@@ -101,7 +101,7 @@ export function AddIncomeDialog({ onAdd }: AddIncomeDialogProps) {
             <Label>Name</Label>
             <Input
               ref={nameRef}
-              placeholder="e.g. GlobalLogic — or paste a row from Excel"
+              placeholder="e.g. GlobalLogic, or paste a row from Excel"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit(false)}
@@ -270,7 +270,7 @@ export function AddBudgetEntryDialog({
     <Dialog open={form.open} onOpenChange={handleOpenChange}>
       <DialogTrigger
         render={
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="min-h-9 sm:min-h-7">
             <PlusIcon />
             Add Expense
           </Button>
@@ -285,7 +285,7 @@ export function AddBudgetEntryDialog({
             <Label>Name</Label>
             <Input
               ref={nameRef}
-              placeholder="e.g. Renta — or paste a row from Excel"
+              placeholder="e.g. Renta, or paste a row from Excel"
               value={form.name}
               onChange={(e) => dispatch({ type: "setName", value: e.target.value })}
               onKeyDown={(e) => e.key === "Enter" && submit(false)}

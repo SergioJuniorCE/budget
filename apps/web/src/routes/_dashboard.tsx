@@ -16,7 +16,7 @@ function DashboardLayout() {
   }
 
   return (
-    <div className="min-h-svh flex flex-col">
+    <div className="flex min-h-[100dvh] flex-col bg-muted/20">
       <Header />
       <main className="flex-1">
         <Outlet />

@@ -1,8 +1,12 @@
-import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CATEGORY_LABELS, CATEGORY_RATIOS, formatCurrency, type UserData } from "./types";
-import type { Category } from "./types";
+import {
+  CATEGORY_LABELS,
+  CATEGORY_RATIOS,
+  formatCurrency,
+  type Category,
+  type UserData,
+} from "./types";
 
 const CATEGORY_FILL: Record<Category, string> = {
   needs: "var(--color-needs)",
@@ -10,151 +14,94 @@ const CATEGORY_FILL: Record<Category, string> = {
   savings: "var(--color-savings)",
 };
 
-const CATEGORY_TEXT: Record<Category, string> = {
-  needs: "text-needs",
-  wants: "text-wants",
-  savings: "text-savings",
+const CATEGORY_LINE: Record<Category, string> = {
+  needs: "bg-needs",
+  wants: "bg-wants",
+  savings: "bg-savings",
 };
 
 interface BudgetDonutChartProps {
   data: UserData;
 }
 
-interface TooltipPayload {
-  name: string;
-  value: number;
-  payload: { label: string; budget: number; pct: number };
-}
-
-function CustomTooltip({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) {
-  if (!active || !payload?.length) return null;
-  const item = payload[0];
-  return (
-    <div className="rounded-lg border bg-popover px-2.5 py-1.5 text-xs shadow-md">
-      <p className="font-medium">{item.payload.label}</p>
-      <p className="tabular-nums text-muted-foreground">{formatCurrency(item.value)}</p>
-      <p className="tabular-nums text-muted-foreground">
-        Budget: {formatCurrency(item.payload.budget)}
-      </p>
-    </div>
-  );
-}
-
 export function BudgetDonutChart({ data }: BudgetDonutChartProps) {
-  const totalIncome = data.incomeEntries.reduce((s, e) => s + e.amount, 0);
-
+  const totalIncome = data.incomeEntries.reduce((sum, entry) => sum + entry.amount, 0);
   const segments = (["needs", "wants", "savings"] as Category[]).map((cat) => {
     const budget = totalIncome * CATEGORY_RATIOS[cat];
     const current = data.budgetEntries
-      .filter((e) => e.category === cat)
-      .reduce((s, e) => s + e.amount, 0);
-    const pct = budget > 0 ? Math.round((current / budget) * 100) : 0;
-    return { cat, label: CATEGORY_LABELS[cat], current, budget, pct };
+      .filter((entry) => entry.category === cat)
+      .reduce((sum, entry) => sum + entry.amount, 0);
+    return { cat, label: CATEGORY_LABELS[cat], current, budget };
   });
 
-  const totalSpent = segments.reduce((s, seg) => s + seg.current, 0);
-  const unassigned = Math.max(0, totalIncome - totalSpent);
-
-  const chartData = [
-    ...segments.map((seg) => ({
-      label: seg.label,
-      value: seg.current,
-      budget: seg.budget,
-      pct: seg.pct,
-      cat: seg.cat,
-    })),
-    ...(unassigned > 0
-      ? [{ label: "Remaining", value: unassigned, budget: 0, pct: 0, cat: "remaining" }]
-      : []),
-  ];
+  const totalSpent = segments.reduce((sum, segment) => sum + segment.current, 0);
+  const remaining = Math.max(0, totalIncome - totalSpent);
+  const chartTotal = Math.max(totalIncome, totalSpent, 1);
+  let currentAngle = 0;
+  const chartStops = segments.map((segment) => {
+    const start = currentAngle;
+    currentAngle += (segment.current / chartTotal) * 360;
+    return `${CATEGORY_FILL[segment.cat]} ${start}deg ${currentAngle}deg`;
+  });
+  if (remaining > 0) {
+    chartStops.push(`var(--color-remaining) ${currentAngle}deg 360deg`);
+  }
 
   return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle>Spending Breakdown</CardTitle>
+    <Card className="h-full gap-0">
+      <CardHeader className="border-b border-border/70 pb-4">
+        <CardTitle>Where it goes</CardTitle>
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent className="flex flex-1 flex-col pt-4">
         {totalIncome === 0 ? (
-          <p className="text-xs text-muted-foreground italic py-4 text-center">
-            Add income to see breakdown
-          </p>
+          <div className="grid min-h-48 place-items-center rounded-lg border border-dashed border-border px-5 text-center">
+            <div>
+              <p className="text-xs font-semibold">No breakdown yet</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Add your first income entry to see the monthly split.
+              </p>
+            </div>
+          </div>
         ) : (
           <>
-            <div className="h-36 min-w-0 flex items-center justify-center">
-              <PieChart width={220} height={140}>
-                <Pie
-                  data={chartData}
-                  dataKey="value"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={32}
-                  outerRadius={50}
-                  paddingAngle={2}
-                  startAngle={90}
-                  endAngle={-270}
-                >
-                  {chartData.map((entry) => (
-                    <Cell
-                      key={entry.cat}
-                      fill={
-                        entry.cat === "remaining"
-                          ? "var(--color-remaining)"
-                          : entry.cat
-                            ? CATEGORY_FILL[entry.cat as Category]
-                            : "var(--muted)"
-                      }
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
+            <div className="relative mx-auto my-1 size-32">
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{ background: `conic-gradient(${chartStops.join(", ")})` }}
+                role="img"
+                aria-label={`Planned expenses total ${formatCurrency(totalSpent)}`}
+              />
+              <div className="absolute inset-5 grid place-items-center rounded-full border border-border/50 bg-card text-center">
+                <div>
+                  <p className="text-[10px] text-muted-foreground">Planned</p>
+                  <p className="mt-0.5 text-xs font-bold tabular-nums">
+                    {formatCurrency(totalSpent)}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-3 space-y-2">
-              {segments.map(({ cat, label, current, budget, pct }) => {
-                const over = current > budget;
-                return (
-                  <div key={cat} className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span
-                        className={cn(
-                          "inline-block h-2 w-2 rounded-full shrink-0",
-                          cat === "needs" && "bg-needs",
-                          cat === "wants" && "bg-wants",
-                          cat === "savings" && "bg-savings",
-                        )}
-                      />
-                      <span className={cn("text-xs font-medium", CATEGORY_TEXT[cat])}>{label}</span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 tabular-nums text-xs">
-                      <span className={cn("text-muted-foreground", over && "text-destructive")}>
-                        {formatCurrency(current)}
-                      </span>
-                      <span className="text-muted-foreground">/</span>
-                      <span className="font-medium">{formatCurrency(budget)}</span>
-                      <span
-                        className={cn(
-                          "w-10 text-right font-semibold",
-                          over ? "text-destructive" : "text-muted-foreground",
-                        )}
-                      >
-                        {pct}%
-                      </span>
-                    </div>
+            <div className="mt-auto space-y-3 pt-3">
+              {segments.map(({ cat, label, current }) => (
+                <div key={cat} className="flex items-center justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className={cn("h-0.5 w-5 shrink-0 rounded-full", CATEGORY_LINE[cat])} />
+                    <span className="truncate text-xs text-muted-foreground">{label}</span>
                   </div>
-                );
-              })}
-              {unassigned > 0 && (
-                <div className="flex items-center justify-between gap-2 border-t pt-2 mt-1">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="inline-block h-2 w-2 rounded-full shrink-0 bg-remaining" />
-                    <span className="text-xs font-medium text-remaining">Remaining</span>
-                  </div>
-                  <span className="tabular-nums text-xs font-semibold text-remaining">
-                    {formatCurrency(unassigned)}
+                  <span className="shrink-0 text-xs font-semibold tabular-nums">
+                    {formatCurrency(current)}
                   </span>
                 </div>
-              )}
+              ))}
+              <div className="flex items-center justify-between gap-3 border-t border-border/70 pt-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="h-0.5 w-5 shrink-0 rounded-full bg-remaining" />
+                  <span className="truncate text-xs text-muted-foreground">Remaining</span>
+                </div>
+                <span className="shrink-0 text-xs font-semibold tabular-nums">
+                  {formatCurrency(remaining)}
+                </span>
+              </div>
             </div>
           </>
         )}

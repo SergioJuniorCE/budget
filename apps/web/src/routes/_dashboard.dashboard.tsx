@@ -3,9 +3,9 @@ import type { Id } from "@budget/backend/convex/_generated/dataModel";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
 import { useCallback } from "react";
+import { CalendarRange, ClipboardPaste } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { BudgetDonutChart } from "@/components/budget/BudgetDonutChart";
 import { CategorySection } from "@/components/budget/CategorySection";
 import { IncomeSection } from "@/components/budget/IncomeSection";
 import { OverviewPanel } from "@/components/budget/OverviewPanel";
@@ -148,12 +148,18 @@ function BudgetDashboard() {
 
   if (isLoading || !rawData) {
     return (
-      <div className="space-y-4 py-4 md:py-6 px-4">
-        <Skeleton className="h-40 w-full" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
+      <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:px-5 lg:py-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-52" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <Skeleton className="h-80 w-full rounded-lg" />
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="space-y-4">
+            <Skeleton className="h-72" />
+            <Skeleton className="h-72" />
+          </div>
+          <Skeleton className="h-72" />
         </div>
       </div>
     );
@@ -172,10 +178,106 @@ function BudgetDashboard() {
   const wantsCurrent = wantsEntries.reduce((s, e) => s + e.amount, 0);
   const savingsCurrent = savingsEntries.reduce((s, e) => s + e.amount, 0);
 
+  const categoryConfigs = [
+    {
+      category: "needs" as const,
+      entries: needsEntries,
+      budget: needsBudget,
+      current: needsCurrent,
+    },
+    {
+      category: "wants" as const,
+      entries: wantsEntries,
+      budget: wantsBudget,
+      current: wantsCurrent,
+    },
+    {
+      category: "savings" as const,
+      entries: savingsEntries,
+      budget: savingsBudget,
+      current: savingsCurrent,
+    },
+  ];
+
+  function renderCategorySections(quincena?: Quincena) {
+    return categoryConfigs.map((config) => (
+      <CategorySection
+        key={`${config.category}-${quincena ?? "both"}`}
+        {...config}
+        quincena={quincena}
+        onAdd={handleAddEntry}
+        onEdit={handleEditEntry}
+        onDelete={handleDeleteEntry}
+        onReorder={handleReorderEntries}
+        onTogglePaid={handleTogglePaid}
+        onResetQuincena={handleResetQuincena}
+      />
+    ));
+  }
+
   return (
-    <div className="space-y-4 py-4 md:py-6 px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="mx-auto max-w-[1600px] space-y-4 px-3 py-4 sm:px-5 lg:py-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.035em]">
+            Monthly budget
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            A worksheet view for income, expenses, and both quincenas.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+          <span className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 font-medium">
+            <ClipboardPaste className="size-3.5 text-primary" aria-hidden="true" />
+            Paste two Excel cells when adding
+          </span>
+          <span className="inline-flex h-8 items-center gap-2 rounded-md border border-border bg-card px-2.5 font-medium">
+            <CalendarRange className="size-3.5 text-primary" aria-hidden="true" />
+            Current month
+          </span>
+        </div>
+      </div>
+
+      <OverviewPanel data={rawData} />
+
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <section aria-labelledby="expense-ledger-title" className="min-w-0 space-y-3">
+          <div className="flex items-end justify-between gap-4 px-0.5">
+            <div>
+              <h2 id="expense-ledger-title" className="text-sm font-semibold">
+                Expense ledger
+              </h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Right-click a row to edit or delete it.
+              </p>
+            </div>
+            <span className="hidden font-mono text-[10px] text-muted-foreground sm:block">
+              50% needs / 30% wants / 20% savings
+            </span>
+          </div>
+
+          <div className="hidden items-start gap-4 lg:grid lg:grid-cols-3">
+            {renderCategorySections()}
+          </div>
+
+          <div className="space-y-6 lg:hidden">
+            {(["1ra", "2da"] as Quincena[]).map((quincena) => (
+              <div key={quincena} className="space-y-3">
+                <div className="flex items-baseline justify-between gap-3 border-b border-border px-0.5 pb-2">
+                  <h3 className="text-sm font-semibold">
+                    {quincena === "1ra" ? "1ra quincena" : "2da quincena"}
+                  </h3>
+                  <span className="font-mono text-[10px] text-muted-foreground">
+                    {quincena === "1ra" ? "Start here" : "Continue here"}
+                  </span>
+                </div>
+                <div className="space-y-3">{renderCategorySections(quincena)}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <aside className="xl:sticky xl:top-[4.5rem]">
           <IncomeSection
             entries={rawData.incomeEntries}
             onAdd={handleAddIncome}
@@ -183,57 +285,7 @@ function BudgetDashboard() {
             onDelete={handleDeleteIncome}
             onReorder={handleReorderIncome}
           />
-        </div>
-        <div>
-          <OverviewPanel data={rawData} />
-        </div>
-        <div>
-          <BudgetDonutChart data={rawData} />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Expenses
-        </h2>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <CategorySection
-          category="needs"
-          entries={needsEntries}
-          budget={needsBudget}
-          current={needsCurrent}
-          onAdd={handleAddEntry}
-          onEdit={handleEditEntry}
-          onDelete={handleDeleteEntry}
-          onReorder={handleReorderEntries}
-          onTogglePaid={handleTogglePaid}
-          onResetQuincena={handleResetQuincena}
-        />
-        <CategorySection
-          category="wants"
-          entries={wantsEntries}
-          budget={wantsBudget}
-          current={wantsCurrent}
-          onAdd={handleAddEntry}
-          onEdit={handleEditEntry}
-          onDelete={handleDeleteEntry}
-          onReorder={handleReorderEntries}
-          onTogglePaid={handleTogglePaid}
-          onResetQuincena={handleResetQuincena}
-        />
-        <CategorySection
-          category="savings"
-          entries={savingsEntries}
-          budget={savingsBudget}
-          current={savingsCurrent}
-          onAdd={handleAddEntry}
-          onEdit={handleEditEntry}
-          onDelete={handleDeleteEntry}
-          onReorder={handleReorderEntries}
-          onTogglePaid={handleTogglePaid}
-          onResetQuincena={handleResetQuincena}
-        />
+        </aside>
       </div>
     </div>
   );
