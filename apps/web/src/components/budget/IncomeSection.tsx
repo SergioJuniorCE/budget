@@ -52,16 +52,23 @@ export function IncomeSection({ entries, onAdd, onEdit, onDelete, onReorder }: I
   const ids = sorted.map((e) => e._id);
 
   return (
-    <Card size="sm">
-      <CardHeader className="border-b">
-        <CardTitle className="flex items-center justify-between">
-          <span>Income</span>
+    <Card size="sm" className="h-full gap-0">
+      <CardHeader className="border-b border-border/70">
+        <CardTitle className="flex items-center justify-between gap-3">
+          <span>Income sources</span>
           <AddIncomeDialog onAdd={onAdd} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-3">
+      <CardContent className="flex flex-1 flex-col pt-3">
         {sorted.length === 0 && (
-          <p className="text-xs text-muted-foreground italic py-2">No income entries yet</p>
+          <div className="grid min-h-40 place-items-center rounded-lg border border-dashed border-border px-4 text-center">
+            <div>
+              <p className="text-xs font-semibold">Start with your income</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Add each monthly income source to calculate your plan.
+              </p>
+            </div>
+          </div>
         )}
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={ids} strategy={verticalListSortingStrategy}>
@@ -81,9 +88,9 @@ export function IncomeSection({ entries, onAdd, onEdit, onDelete, onReorder }: I
           </SortableContext>
         </DndContext>
         {sorted.length > 0 && (
-          <div className="mt-3 border-t pt-2 flex justify-between items-center">
-            <span className="text-xs font-medium">Total Income</span>
-            <span className="text-xs font-semibold tabular-nums">{formatCurrency(total)}</span>
+          <div className="mt-auto flex items-center justify-between rounded-lg bg-primary/8 px-3 py-2.5">
+            <span className="text-xs font-medium text-muted-foreground">Monthly income</span>
+            <span className="text-sm font-semibold tabular-nums">{formatCurrency(total)}</span>
           </div>
         )}
       </CardContent>

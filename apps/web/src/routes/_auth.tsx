@@ -34,7 +34,7 @@ function AuthLayout() {
 
       {/* Subtle footer */}
       <div className="mt-8 text-xs text-muted-foreground">
-        Better Track — 50/30/20 budget tracking
+        Better Track - 50/30/20 budget tracking
       </div>
     </div>
   );

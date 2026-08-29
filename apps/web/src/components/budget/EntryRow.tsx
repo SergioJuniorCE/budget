@@ -89,7 +89,7 @@ export function EntryRow({
       <ContextMenuTrigger>
         <div
           className={cn(
-            "group flex items-center gap-1 py-1 border-b border-border/50 transition-opacity",
+            "group flex min-h-9 items-center gap-1 border-b border-border/50 py-1 transition-opacity",
             paid && "opacity-50",
             className,
           )}
@@ -99,7 +99,7 @@ export function EntryRow({
             <Checkbox
               checked={!!paid}
               onCheckedChange={(checked) => onTogglePaid(!!checked)}
-              className="shrink-0 h-3 w-3"
+              className="relative size-4 shrink-0 after:absolute after:-inset-2"
               aria-label={paid ? "Mark as unpaid" : "Mark as paid"}
             />
           )}

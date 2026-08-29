@@ -1,146 +1,121 @@
+import { ArrowRight, Check, CircleDollarSign, ListChecks } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { buttonVariants } from "@/components/ui/button";
+
+import { buttonVariants } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_landing/")({
   component: HomeComponent,
 });
 
-const FEATURES = [
-  {
-    label: "Needs",
-    pct: "50%",
-    color: "bg-needs",
-    textColor: "text-needs",
-    title: "50/30/20 built in",
-    description:
-      "Automatically allocate income across needs, wants, and savings. No spreadsheets, no manual math.",
-  },
-  {
-    label: "Quincenas",
-    pct: "1ra / 2da",
-    color: "bg-wants",
-    textColor: "text-wants",
-    title: "Quincena tracking",
-    description: "Split expenses across your two pay periods. Always know what's due and when.",
-  },
-  {
-    label: "Visual",
-    pct: "Live",
-    color: "bg-savings",
-    textColor: "text-savings",
-    title: "Real-time breakdown",
-    description: "Progress bars, donut charts, and budget stats that update as you add entries.",
-  },
-];
+const ALLOCATIONS = [
+  { label: "Needs", ratio: "50%", amount: "$12,500", className: "bg-needs", width: "50%" },
+  { label: "Wants", ratio: "30%", amount: "$7,500", className: "bg-wants", width: "30%" },
+  { label: "Savings", ratio: "20%", amount: "$5,000", className: "bg-savings", width: "20%" },
+] as const;
+
+const PAYDAY_POINTS = [
+  "Split every expense between the first and second quincena.",
+  "Check off payments without losing the monthly view.",
+  "See what remains before the next payday arrives.",
+] as const;
 
 function HomeComponent() {
   return (
-    <div className="flex flex-col">
-      {/* Hero */}
-      <section className="flex flex-col items-center justify-center text-center px-4 pt-16 pb-12 md:pt-24 md:pb-16">
-        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 max-w-3xl leading-tight">
-          Know where your money goes{" "}
-          <span className="text-muted-foreground font-normal">
-            with the <span className="text-needs font-semibold">50</span>
-            <span className="text-muted-foreground">/</span>
-            <span className="text-wants font-semibold">30</span>
-            <span className="text-muted-foreground">/</span>
-            <span className="text-savings font-semibold">20</span> rule
-          </span>
-        </h1>
+    <div className="overflow-hidden">
+      <section className="mx-auto grid min-h-[calc(100dvh-4rem)] max-w-7xl items-center gap-10 px-4 py-12 sm:px-6 md:grid-cols-[0.9fr_1.1fr] md:py-16 lg:gap-20 lg:px-8">
+        <div className="landing-reveal max-w-xl">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+            A budget for both paydays
+          </p>
+          <h1 className="font-display text-5xl font-semibold leading-[0.96] tracking-[-0.055em] text-balance sm:text-6xl lg:text-7xl">
+            Your money, clear by payday.
+          </h1>
+          <p className="mt-6 max-w-[34rem] text-base leading-relaxed text-muted-foreground sm:text-lg">
+            Plan each quincena, keep the 50/30/20 rule visible, and know what is truly left.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link
+              to="/dashboard"
+              className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-sm")}
+            >
+              Start budgeting
+              <ArrowRight aria-hidden="true" />
+            </Link>
+            <Link
+              to="/sign-in"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "h-11 px-5 text-sm",
+              )}
+            >
+              Sign in
+            </Link>
+          </div>
+        </div>
 
-        <p className="text-sm md:text-base text-muted-foreground max-w-lg mb-8 leading-relaxed">
-          Track needs, wants, and savings across your quincena. See exactly where your money goes
-          every month, every pay period.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link to="/dashboard" className={cn(buttonVariants({ size: "lg" }), "px-8")}>
-            Get started
-          </Link>
-          <Link
-            to="/sign-in"
-            className={cn(buttonVariants({ size: "lg", variant: "outline" }), "px-8")}
-          >
-            Sign in
-          </Link>
+        <div className="landing-image-reveal relative md:justify-self-end">
+          <div className="absolute -left-5 bottom-10 hidden w-40 rounded-lg border border-border/70 bg-card/95 p-4 shadow-lg backdrop-blur md:block lg:-left-10">
+            <p className="text-xs text-muted-foreground">Monthly view</p>
+            <p className="mt-1 font-display text-2xl font-semibold tracking-tight">One plan</p>
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              Two paydays, kept in context.
+            </p>
+          </div>
+          <img
+            src="/images/budget-ritual.webp"
+            alt="Notebook, calculator, receipts, and pencil arranged for a monthly budget review"
+            width={1122}
+            height={1402}
+            fetchPriority="high"
+            className="h-[36dvh] min-h-64 w-full rounded-lg object-cover shadow-[0_28px_80px_oklch(0.16_0.02_70/0.18)] md:aspect-[4/5] md:h-auto md:max-h-[74dvh] md:max-w-[34rem]"
+          />
         </div>
       </section>
 
-      {/* Budget bar showcase */}
-      <section className="px-4 pb-16 md:pb-20">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-card border rounded-xl shadow-sm p-6 md:p-8">
-            {/* Mock income header */}
-            <div className="flex items-center justify-between mb-6">
+      <section className="border-y border-border/70 bg-card/45 px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+          <div className="max-w-md">
+            <h2 className="font-display text-4xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-5xl">
+              A useful rule, already worked out.
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+              Enter your income once. Better Track keeps the recommended split visible while you
+              plan the month.
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-border/70 bg-background p-5 shadow-sm sm:p-7">
+            <div className="flex items-end justify-between gap-4">
               <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                  Monthly income
-                </p>
-                <p className="text-2xl md:text-3xl font-bold tracking-tight tabular-nums mt-0.5">
-                  $25,000.00
+                <p className="text-sm text-muted-foreground">Example monthly income</p>
+                <p className="mt-1 font-display text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl">
+                  $25,000 MXN
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                  Remaining
-                </p>
-                <p className="text-2xl md:text-3xl font-bold tracking-tight tabular-nums text-savings mt-0.5">
-                  $7,500.00
-                </p>
-              </div>
+              <CircleDollarSign className="size-7 text-primary" aria-hidden="true" />
             </div>
-
-            {/* Large budget bar */}
-            <div className="space-y-1 mb-6">
-              <div className="flex h-4 w-full rounded-full overflow-hidden gap-1">
-                <div className="bg-needs rounded-l-full" style={{ flex: 50 }} />
-                <div className="bg-wants" style={{ flex: 30 }} />
-                <div className="bg-savings rounded-r-full" style={{ flex: 20 }} />
-              </div>
-              <div className="flex justify-between text-xs text-muted-foreground pt-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-needs" />
-                  <span>Needs</span>
-                  <span className="tabular-nums font-medium text-foreground">$12,500</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-wants" />
-                  <span>Wants</span>
-                  <span className="tabular-nums font-medium text-foreground">$7,500</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-savings" />
-                  <span>Savings</span>
-                  <span className="tabular-nums font-medium text-foreground">$5,000</span>
-                </div>
-              </div>
+            <div
+              className="mt-8 flex h-3 overflow-hidden rounded-full"
+              aria-label="50 percent needs, 30 percent wants, 20 percent savings"
+            >
+              {ALLOCATIONS.map((item) => (
+                <span key={item.label} className={item.className} style={{ width: item.width }} />
+              ))}
             </div>
-
-            {/* Mock category rows */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: "Needs", items: ["Renta", "Groceries", "Transport"], color: "text-needs" },
-                {
-                  label: "Wants",
-                  items: ["Dining out", "Streaming", "Shopping"],
-                  color: "text-wants",
-                },
-                {
-                  label: "Savings",
-                  items: ["Emergency fund", "Investments"],
-                  color: "text-savings",
-                },
-              ].map((cat) => (
-                <div key={cat.label} className="space-y-1.5">
-                  <p className={cn("text-xs font-semibold", cat.color)}>{cat.label}</p>
-                  {cat.items.map((item) => (
-                    <div key={item} className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground truncate">{item}</span>
-                      <span className="text-muted-foreground/60 tabular-nums ml-2">$—</span>
-                    </div>
-                  ))}
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              {ALLOCATIONS.map((item) => (
+                <div
+                  key={item.label}
+                  className="border-l-2 border-border pl-3 first:border-needs sm:[&:nth-child(2)]:border-wants sm:[&:nth-child(3)]:border-savings"
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-sm font-semibold">{item.label}</p>
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {item.ratio}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-sm tabular-nums text-muted-foreground">{item.amount}</p>
                 </div>
               ))}
             </div>
@@ -148,45 +123,55 @@ function HomeComponent() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="px-4 py-16 bg-muted/30 border-y">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-center text-xl md:text-2xl font-semibold tracking-tight mb-2">
-            Built around how you actually get paid
+      <section className="mx-auto grid max-w-7xl gap-12 px-4 py-20 sm:px-6 md:grid-cols-[1.08fr_0.92fr] md:items-center lg:px-8 lg:py-28">
+        <img
+          src="/images/two-paydays.webp"
+          alt="Two green folders, receipts, and a monthly calendar arranged for two pay periods"
+          width={1536}
+          height={1024}
+          loading="lazy"
+          className="aspect-[3/2] w-full rounded-lg object-cover shadow-[0_24px_70px_oklch(0.16_0.02_70/0.16)]"
+        />
+        <div className="max-w-lg md:pl-6">
+          <h2 className="font-display text-4xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-5xl">
+            The month, in two calmer halves.
           </h2>
-          <p className="text-center text-muted-foreground text-sm mb-10">
-            No spreadsheets, no manual math, no guesswork.
+          <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+            Organize due dates around the way you are paid without losing sight of the full month.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <span className={cn("inline-block h-2 w-2 rounded-full", f.color)} />
-                  <span
-                    className={cn("text-xs font-semibold uppercase tracking-wider", f.textColor)}
-                  >
-                    {f.label}
-                  </span>
-                </div>
-                <h3 className="text-sm font-semibold">{f.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{f.description}</p>
-              </div>
+          <ul className="mt-8 space-y-5">
+            {PAYDAY_POINTS.map((point) => (
+              <li key={point} className="flex gap-3 text-sm leading-relaxed">
+                <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-primary/12 text-primary">
+                  <Check className="size-3.5" aria-hidden="true" />
+                </span>
+                {point}
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <section className="px-4 py-16">
-        <div className="max-w-xl mx-auto text-center">
-          <h2 className="text-xl md:text-2xl font-semibold tracking-tight mb-3">
-            Take control of your budget
-          </h2>
-          <p className="text-muted-foreground text-sm mb-6">
-            Free, personal, and updates in real time.
-          </p>
-          <Link to="/dashboard" className={cn(buttonVariants({ size: "lg" }), "px-10")}>
-            Open dashboard
+      <section className="bg-primary px-4 py-16 text-primary-foreground sm:px-6 lg:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_auto] md:items-end">
+          <div className="max-w-2xl">
+            <ListChecks className="mb-6 size-8 opacity-75" aria-hidden="true" />
+            <h2 className="font-display text-4xl font-semibold leading-[1.02] tracking-[-0.045em] sm:text-5xl">
+              Make the next payday feel expected.
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-primary-foreground/75">
+              Build a plan you can update in minutes, then return to whenever money moves.
+            </p>
+          </div>
+          <Link
+            to="/dashboard"
+            className={cn(
+              buttonVariants({ variant: "secondary", size: "lg" }),
+              "h-11 w-fit bg-background px-5 text-sm text-foreground hover:bg-background/90",
+            )}
+          >
+            Start budgeting
+            <ArrowRight aria-hidden="true" />
           </Link>
         </div>
       </section>

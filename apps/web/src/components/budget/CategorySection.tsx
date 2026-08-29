@@ -33,6 +33,12 @@ const CATEGORY_BG: Record<Category, string> = {
   savings: "bg-savings",
 };
 
+const CATEGORY_BORDER: Record<Category, string> = {
+  needs: "border-t-needs",
+  wants: "border-t-wants",
+  savings: "border-t-savings",
+};
+
 function sortedEntries(entries: BudgetEntry[]): BudgetEntry[] {
   return [...entries].sort((a, b) => {
     if (a.order !== undefined && b.order !== undefined) return a.order - b.order;
@@ -82,12 +88,15 @@ export function CategorySection({
   const overBudget = current > budget;
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="border-b">
+    <Card className={cn("flex flex-col gap-0 border-t-2", CATEGORY_BORDER[category])}>
+      <CardHeader className="border-b border-border/70">
         <CardTitle className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-baseline gap-2">
             <span className={cn("font-semibold", CATEGORY_COLORS[category])}>
               {CATEGORY_LABELS[category]}
+            </span>
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {category === "needs" ? "50%" : category === "wants" ? "30%" : "20%"}
             </span>
           </div>
           <AddBudgetEntryDialog defaultCategory={category} onAdd={onAdd} />
@@ -103,21 +112,21 @@ export function CategorySection({
               style={{ width: `${pct}%` }}
             />
           </div>
-          <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
-            <span>{formatCurrency(current)} spent</span>
-            <span>{formatCurrency(budget)} budget</span>
+          <div className="flex justify-between text-[11px] text-muted-foreground tabular-nums">
+            <span>{formatCurrency(current)} planned</span>
+            <span>{formatCurrency(budget)} target</span>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-3 flex-1 flex flex-col">
-        <div className="grid grid-cols-2 divide-x items-stretch flex-1">
+      <CardContent className="flex flex-1 flex-col pt-3">
+        <div className="grid flex-1 grid-cols-1 items-stretch divide-y sm:grid-cols-2 sm:divide-x sm:divide-y-0">
           <QuincenaExpenseColumn
             label="1ra Quincena"
             entries={q1}
             total={q1Total}
             category={category}
             quincena="1ra"
-            className="pr-3"
+            className="pb-3 sm:pr-3 sm:pb-0"
             onAdd={onAdd}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -131,7 +140,7 @@ export function CategorySection({
             total={q2Total}
             category={category}
             quincena="2da"
-            className="pl-3"
+            className="pt-3 sm:pt-0 sm:pl-3"
             onAdd={onAdd}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -140,8 +149,8 @@ export function CategorySection({
             onResetQuincena={onResetQuincena}
           />
         </div>
-        <div className="mt-3 border-t pt-2 flex justify-between items-center">
-          <span className="text-xs font-medium">Total</span>
+        <div className="mt-3 flex items-center justify-between rounded-lg bg-muted/65 px-3 py-2">
+          <span className="text-xs font-medium text-muted-foreground">Category total</span>
           <span
             className={cn("text-xs font-semibold tabular-nums", overBudget && "text-destructive")}
           >
@@ -209,7 +218,7 @@ function QuincenaExpenseColumn({
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      <div className="flex items-center justify-between mb-1 gap-1">
+      <div className="mb-1 flex min-h-8 items-center justify-between gap-1">
         <div className="flex items-center gap-1.5 min-w-0">
           <p className="text-xs text-muted-foreground font-medium shrink-0">{label}</p>
           {entries.length > 0 && (
@@ -221,7 +230,7 @@ function QuincenaExpenseColumn({
         <div className="flex items-center gap-2 shrink-0">
           {hasPaid && (
             <button
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="min-h-11 text-xs text-muted-foreground transition-colors hover:text-foreground sm:min-h-0"
               onClick={() => onResetQuincena(quincena)}
               aria-label={`Reset payments for ${label}`}
             >
@@ -229,7 +238,7 @@ function QuincenaExpenseColumn({
             </button>
           )}
           <button
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="min-h-11 text-xs text-muted-foreground transition-colors hover:text-foreground sm:min-h-0"
             onClick={() => {
               const name = window.prompt("Name:");
               if (!name) return;
@@ -241,12 +250,16 @@ function QuincenaExpenseColumn({
             }}
             aria-label={`Quick add to ${label}`}
           >
-            + Quick add
+            + Quick
           </button>
         </div>
       </div>
       <div className="flex-1 flex flex-col border-t border-border/50">
-        {entries.length === 0 && <p className="text-xs text-muted-foreground italic">No entries</p>}
+        {entries.length === 0 && (
+          <p className="py-3 text-xs leading-relaxed text-muted-foreground">
+            Add an expense for this quincena.
+          </p>
+        )}
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={ids} strategy={verticalListSortingStrategy}>
             {entries.map((entry) => (

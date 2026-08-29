@@ -3,6 +3,7 @@ import type { Id } from "@budget/backend/convex/_generated/dataModel";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "convex/react";
 import { useCallback } from "react";
+import { CalendarRange } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { BudgetDonutChart } from "@/components/budget/BudgetDonutChart";
@@ -148,12 +149,20 @@ function BudgetDashboard() {
 
   if (isLoading || !rawData) {
     return (
-      <div className="space-y-4 py-4 md:py-6 px-4">
-        <Skeleton className="h-40 w-full" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
+      <div className="mx-auto max-w-[1600px] space-y-5 px-3 py-5 sm:px-5 lg:py-7">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-52" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <div className="grid gap-4 lg:grid-cols-12">
+          <Skeleton className="h-72 lg:col-span-6" />
+          <Skeleton className="h-72 lg:col-span-3" />
+          <Skeleton className="h-72 lg:col-span-3" />
+        </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
         </div>
       </div>
     );
@@ -173,9 +182,27 @@ function BudgetDashboard() {
   const savingsCurrent = savingsEntries.reduce((s, e) => s + e.amount, 0);
 
   return (
-    <div className="space-y-4 py-4 md:py-6 px-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="mx-auto max-w-[1600px] space-y-5 px-3 py-5 sm:px-5 lg:py-7">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
+          <h1 className="font-display text-2xl font-semibold tracking-[-0.035em] sm:text-3xl">
+            Monthly plan
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Keep both quincenas in view and adjust the plan as money moves.
+          </p>
+        </div>
+        <div className="flex w-fit items-center gap-2 rounded-lg border border-border/70 bg-card px-3 py-2 text-xs font-medium text-muted-foreground shadow-sm">
+          <CalendarRange className="size-4 text-primary" aria-hidden="true" />
+          Current month
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-12">
+        <div className="lg:col-span-6">
+          <OverviewPanel data={rawData} />
+        </div>
+        <div className="lg:col-span-3">
           <IncomeSection
             entries={rawData.incomeEntries}
             onAdd={handleAddIncome}
@@ -184,20 +211,21 @@ function BudgetDashboard() {
             onReorder={handleReorderIncome}
           />
         </div>
-        <div>
-          <OverviewPanel data={rawData} />
-        </div>
-        <div>
+        <div className="lg:col-span-3">
           <BudgetDonutChart data={rawData} />
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-          Expenses
-        </h2>
+      <div className="flex items-end justify-between gap-4 pt-2">
+        <div>
+          <h2 className="font-display text-xl font-semibold tracking-[-0.025em]">Expenses</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Compare each category with its monthly target.
+          </p>
+        </div>
+        <span className="hidden text-xs text-muted-foreground sm:block">50 / 30 / 20</span>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <CategorySection
           category="needs"
           entries={needsEntries}
